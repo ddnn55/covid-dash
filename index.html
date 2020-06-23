@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COVID Dash</title>
+<style>
+.table {
+    font-family: monospace;
+    white-space: pre;
+}
+</style>
+</head>
+<body>
+    <div class="table"></div>
+<script>
+const table = document.querySelector('.table');
+
+(async () => {
+    const result = await fetch("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
+    const csvText = await result.text();
+    table.innerHTML = csvText;
+})();
+
+</script>
+</body>
+</html>
