@@ -10,9 +10,11 @@
     white-space: pre;
 }
 </style>
+
 </head>
 <body>
     <div class="table"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"></script>
 <script>
 const table = document.querySelector('.table');
 
@@ -20,6 +22,11 @@ const table = document.querySelector('.table');
     const result = await fetch("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
     const csvText = await result.text();
     table.innerHTML = csvText;
+
+    const rows = csvText.split('\n').slice(1).map(line => line.split(','));
+    table.innerHTML = JSON.stringify(rows, null, 2);
+    const byDay = _.groupBy(rows, row => row[0]);
+    console.log(byDay)
 })();
 
 </script>
