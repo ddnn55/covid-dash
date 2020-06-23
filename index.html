@@ -32,7 +32,11 @@ const loadDsv = async (url, separator) => {
     console.log(byDay)
 
     const populationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
-    console.log(populationRows)
+    let populations = {};
+    populationRows.forEach(([name, pop]) => {
+        populations[name] = +pop.split(',').join('');
+    });
+    console.log(populations)
 })();
 
 </script>
