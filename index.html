@@ -30,12 +30,6 @@
         };
 
         (async () => {
-            const covidRows = (await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]);
-            console.log(covidRows)
-
-            table.innerHTML = JSON.stringify(covidRows, null, 2);
-            const byDay = _.groupBy(covidRows, row => row[0]);
-            // console.log(byDay)
 
             const populationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
             let populations = {};
@@ -43,6 +37,13 @@
                 populations[name] = +pop.split(',').join('');
             });
             // console.log(populations)
+
+            const covidRows = (await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]);
+            console.log(covidRows)
+
+            table.innerHTML = JSON.stringify(covidRows, null, 2);
+            const byDay = _.groupBy(covidRows, row => row[0]);
+            // console.log(byDay)
 
             const byRegion = _.groupBy(covidRows, row => row[1]);
             for(const region in byRegion) {
