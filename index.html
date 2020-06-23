@@ -51,7 +51,7 @@
                     return [
                         row[0],
                         row[1],
-                        r === 0 ? row[2] : row[2] - byRegion[region][r-1][2]
+                        (r === 0 ? row[2] : row[2] - byRegion[region][r-1][2]) / populations[row[1]]
                     ];
                 });
                 // byRegion[region].slice(1).forEach((row, r) => {
