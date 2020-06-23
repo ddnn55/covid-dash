@@ -29,6 +29,14 @@
             return dsvText.split('\n').slice(1).map(line => line.split(separator));
         };
 
+        const sevenDayAverage = (rows, r) => {
+            const startIndex = Math.max(0, r-6);
+            const windowRows = rows.slice(startIndex, r+1);
+            const sum = _.sum(windowRows.map(row => row[2]));
+            const count = (r+1-startIndex);
+            return sum / count;
+        };
+
         (async () => {
 
             const populationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
@@ -47,24 +55,35 @@
 
             const byRegion = _.groupBy(covidRows, row => row[1]);
             for(const region in byRegion) {
+                
+                // calculate daily change
+                byRegion[region] = byRegion[region].map((row, r) => {
+                    const changeCases = r === 0 ? row[2] : row[2] - byRegion[region][r-1][2];
+                    // const sevenDayAverage = 
+                    return [
+                        row[0],
+                        row[1],
+                        changeCases
+                    ];
+                });
+
+                // calculate 7 day average change and per capita
                 byRegion[region] = byRegion[region].map((row, r) => {
                     return [
                         row[0],
                         row[1],
-                        (r === 0 ? row[2] : row[2] - byRegion[region][r-1][2]) / populations[row[1]]
+                        row[2],
+                        sevenDayAverage(byRegion[region], r)
                     ];
                 });
-                // byRegion[region].slice(1).forEach((row, r) => {
-                //     const prevDay = byRegion[region][r][2];
-                //     row[2] = row[2] - prevDay;
-                // });
+                
                 byRegion[region] = _.keyBy(byRegion[region], row => row[0]);
             }
             console.log(byRegion)
 
             const highchartsSeries = Object.keys(byRegion).map(region => ({
                 name: region,
-                data: Object.keys(byDay).map(day => byRegion[region][day] ? byRegion[region][day][2] : 0)
+                data: Object.keys(byDay).map(day => byRegion[region][day] ? byRegion[region][day][3] : 0)
             }));
             console.log(highchartsSeries)
 
