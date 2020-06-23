@@ -30,22 +30,29 @@
         };
 
         (async () => {
-            const covidRows = await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',');
+            const covidRows = (await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]);
 
             table.innerHTML = JSON.stringify(covidRows, null, 2);
             const byDay = _.groupBy(covidRows, row => row[0]);
-            console.log(byDay)
+            // console.log(byDay)
 
             const populationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
             let populations = {};
             populationRows.forEach(([name, pop]) => {
                 populations[name] = +pop.split(',').join('');
             });
-            console.log(populations)
+            // console.log(populations)
+
+            const byRegion = _.groupBy(covidRows, row => row[1]);
+            for(const region in byRegion) {
+                byRegion[region] = _.groupBy(byRegion[region], row => row[0]);
+            }
+            console.log(byRegion)
 
             Highcharts.chart(chartContainer, {
                 xAxis: {
-                    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                    // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+                    categories: Object.keys(byDay)
                 },
 
                 series: [{
@@ -53,6 +60,8 @@
                 }, {
                     data: [216.4, 194.1, 95.6, 54.4, 29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5],
                     lineWidth: 5
+                }, {
+                    data: byRegion['California']
                 }]
             });
         })();
