@@ -41,12 +41,23 @@
             const covidRows = (await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]);
             console.log(covidRows)
 
-            table.innerHTML = JSON.stringify(covidRows, null, 2);
+            // table.innerHTML = JSON.stringify(covidRows, null, 2);
             const byDay = _.groupBy(covidRows, row => row[0]);
             // console.log(byDay)
 
             const byRegion = _.groupBy(covidRows, row => row[1]);
             for(const region in byRegion) {
+                byRegion[region] = byRegion[region].map((row, r) => {
+                    return [
+                        row[0],
+                        row[1],
+                        r === 0 ? row[2] : row[2] - byRegion[region][r-1][2]
+                    ];
+                });
+                // byRegion[region].slice(1).forEach((row, r) => {
+                //     const prevDay = byRegion[region][r][2];
+                //     row[2] = row[2] - prevDay;
+                // });
                 byRegion[region] = _.keyBy(byRegion[region], row => row[0]);
             }
             console.log(byRegion)
