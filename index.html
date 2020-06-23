@@ -31,6 +31,7 @@
 
         (async () => {
             const covidRows = (await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]);
+            console.log(covidRows)
 
             table.innerHTML = JSON.stringify(covidRows, null, 2);
             const byDay = _.groupBy(covidRows, row => row[0]);
@@ -45,9 +46,15 @@
 
             const byRegion = _.groupBy(covidRows, row => row[1]);
             for(const region in byRegion) {
-                byRegion[region] = _.groupBy(byRegion[region], row => row[0]);
+                byRegion[region] = _.keyBy(byRegion[region], row => row[0]);
             }
             console.log(byRegion)
+
+            const highchartsSeries = Object.keys(byRegion).map(region => ({
+                name: region,
+                data: Object.keys(byDay).map(day => byRegion[region][day] ? byRegion[region][day][2] : 0)
+            }));
+            console.log(highchartsSeries)
 
             Highcharts.chart(chartContainer, {
                 xAxis: {
@@ -55,14 +62,14 @@
                     categories: Object.keys(byDay)
                 },
 
-                series: [{
-                    data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
-                }, {
-                    data: [216.4, 194.1, 95.6, 54.4, 29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5],
-                    lineWidth: 5
-                }, {
-                    data: byRegion['California']
-                }]
+                series: highchartsSeries
+                // series: [{
+                //     data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+                // }, {
+                //     data: [216.4, 194.1, 95.6, 54.4, 29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5],
+                //     lineWidth: 5,
+                //     name: "hello"
+                // }]
             });
         })();
 
