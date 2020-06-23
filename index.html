@@ -18,15 +18,20 @@
 <script>
 const table = document.querySelector('.table');
 
-(async () => {
-    const result = await fetch("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
-    const csvText = await result.text();
-    table.innerHTML = csvText;
+const loadDsv = async (url, separator) => {
+    const result = await fetch(url);
+    const dsvText = await result.text();
+    return dsvText.split('\n').slice(1).map(line => line.split(separator));
+};
 
-    const rows = csvText.split('\n').slice(1).map(line => line.split(','));
+(async () => {
+    const rows = await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',');
+
     table.innerHTML = JSON.stringify(rows, null, 2);
     const byDay = _.groupBy(rows, row => row[0]);
     console.log(byDay)
+
+    
 })();
 
 </script>
