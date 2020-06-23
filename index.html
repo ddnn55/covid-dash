@@ -25,13 +25,14 @@ const loadDsv = async (url, separator) => {
 };
 
 (async () => {
-    const rows = await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',');
+    const covidRows = await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',');
 
-    table.innerHTML = JSON.stringify(rows, null, 2);
-    const byDay = _.groupBy(rows, row => row[0]);
+    table.innerHTML = JSON.stringify(covidRows, null, 2);
+    const byDay = _.groupBy(covidRows, row => row[0]);
     console.log(byDay)
 
-    
+    const populationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
+    console.log(populationRows)
 })();
 
 </script>
