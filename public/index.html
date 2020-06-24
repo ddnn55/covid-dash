@@ -86,10 +86,10 @@
             }
             console.log(byRegion)
 
-            const highchartsSeries = Object.keys(byRegion).map(region => ({
+            const highchartsSeries = _.sortBy(Object.keys(byRegion).map(region => ({
                 name: region,
                 data: Object.keys(byDay).map(day => byRegion[region][day] ? byRegion[region][day][3] : 0)
-            }));
+            })), regionSeries => regionSeries.name);
             console.log(highchartsSeries)
 
             Highcharts.chart(chartContainer, {
