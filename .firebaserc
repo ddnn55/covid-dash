@@ -1,1 +1,5 @@
-{}
+{
+  "projects": {
+    "default": "covid-dash-e2612"
+  }
+}
