@@ -9,17 +9,49 @@
         body {
             margin: 0;
         }
-        .table {
-            font-family: monospace;
-            white-space: pre;
+        .header {
+            text-align: center;
+        }
+        .title, .subtitle {
+            text-align: center;
+            display: inline-block;
+        }
+        .title {
+            font-size: 22px;
+        }
+        .subtitle {
+            font-size: 14px;
+            margin-left: 20px;
+        }
+        .chart-container {
+            height: 80vh;
+            /* min-width: 800px; */
+        }
+        .layout {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .chart-container {
+            flex: 1;
         }
     </style>
 
 </head>
 
 <body>
-    <div class="chart-container"></div>
-    <div class="table"></div>
+    <div class="layout">
+        <div class="header">
+            <div class="title">
+                COVID-19: New Cases per 100k People by U.S. Region
+            </div>
+            <div class="subtitle">Data: <a href="https://github.com/nytimes/covid-19-data">NYTimes</a>, <a href="https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States_by_population#State_rankings">Wikipedia</a>. Fork/contribute on <a href="https://github.com/gimlids/covid-dash/issues">GitHub</a>.
+            </div>
+        </div>
+    
+        <div class="chart-container"></div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"></script>
     <script src="lib/highcharts.js"></script>
     <script>
@@ -102,10 +134,10 @@
                 },
 
                 chart: {
-                    height: innerHeight
+                    // height: innerHeight
                 },
                 title: {
-                    text: 'COVID-19: New Cases per 100k People by U.S. Region. Data: <a href="https://github.com/nytimes/covid-19-data">NYTimes</a>'
+                    text: ""
                 },
 
                 series: highchartsSeries,
