@@ -68,10 +68,11 @@ const sevenDayAverage = (rows, r) => {
 
     const countyPopulationRows = await loadDsv("us-counties-population-estimate-2019.tsv", "\t");
     let countyPopulations = {};
-    countyPopulationRows.forEach(([name, pop]) => {
-        countyPopulations[name] = +pop.split(',').join('');
+    countyPopulationRows.forEach(([county, state, pop]) => {
+        countyPopulations[state] = countyPopulations[state] || {};
+        countyPopulations[state][county] = +pop.split(',').join('');
     });
-    console.log(countyPopulations)
+    console.log({countyPopulations})
 
     const stateRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
     const countyRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
