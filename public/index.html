@@ -85,20 +85,24 @@
             });
             // console.log(populations)
 
-            const covidRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
+            const stateRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
             const countyRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
-            console.log({countyRows});
+            // console.log({countyRows});
 
-            // table.innerHTML = JSON.stringify(covidRows, null, 2);
-            const byDay = _.groupBy(covidRows, row => row[0]);
-            // console.log(byDay)
+            const countiesByDay = _.groupBy(countyRows, row => row[0]);
+            const countiesByRegion = _.groupBy(countyRows, row => row[1]);
+            console.log({countiesByRegion})
 
-            const byRegion = _.groupBy(covidRows, row => row[1]);
-            for(const region in byRegion) {
+            // table.innerHTML = JSON.stringify(stateRows, null, 2);
+            const statesByDay = _.groupBy(stateRows, row => row[0]);
+            // console.log(statesByDay)
+
+            const statesByRegion = _.groupBy(stateRows, row => row[1]);
+            for(const region in statesByRegion) {
                 
                 // calculate daily change
-                byRegion[region] = byRegion[region].map((row, r) => {
-                    const changeCases = r === 0 ? row[2] : row[2] - byRegion[region][r-1][2];
+                statesByRegion[region] = statesByRegion[region].map((row, r) => {
+                    const changeCases = r === 0 ? row[2] : row[2] - statesByRegion[region][r-1][2];
                     // const sevenDayAverage = 
                     return [
                         row[0],
@@ -108,29 +112,29 @@
                 });
 
                 // calculate 7 day average change per capita
-                byRegion[region] = byRegion[region].map((row, r) => {
+                statesByRegion[region] = statesByRegion[region].map((row, r) => {
                     return [
                         row[0],
                         row[1],
                         row[2],
-                        100000 * sevenDayAverage(byRegion[region], r) / populations[region]
+                        100000 * sevenDayAverage(statesByRegion[region], r) / populations[region]
                     ];
                 });
                 
-                byRegion[region] = _.keyBy(byRegion[region], row => row[0]);
+                statesByRegion[region] = _.keyBy(statesByRegion[region], row => row[0]);
             }
-            console.log(byRegion)
+            console.log(statesByRegion)
 
-            const highchartsSeries = _.sortBy(Object.keys(byRegion).map(region => ({
+            const highchartsSeries = _.sortBy(Object.keys(statesByRegion).map(region => ({
                 name: region,
-                data: Object.keys(byDay).map(day => byRegion[region][day] ? byRegion[region][day][3] : 0)
+                data: Object.keys(statesByDay).map(day => statesByRegion[region][day] ? statesByRegion[region][day][3] : 0)
             })), regionSeries => regionSeries.name);
             console.log(highchartsSeries)
 
             Highcharts.chart(chartContainer, {
                 xAxis: {
                     // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                    categories: Object.keys(byDay),
+                    categories: Object.keys(statesByDay),
                 },
                 yAxis: {
                     floor: 0
