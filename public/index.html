@@ -66,6 +66,8 @@
             return dsvText.split('\n').slice(1).map(line => line.split(separator));
         };
 
+        const loadCovidRows = async url => (await loadDsv(url, ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]).filter(row => row[0] >= minDay);
+
         const sevenDayAverage = (rows, r) => {
             const startIndex = Math.max(0, r-6);
             const windowRows = rows.slice(startIndex, r+1);
@@ -83,8 +85,9 @@
             });
             // console.log(populations)
 
-            const covidRows = (await loadDsv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv", ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]).filter(row => row[0] >= minDay);
-            console.log(covidRows)
+            const covidRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
+            const countyRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
+            console.log({countyRows});
 
             // table.innerHTML = JSON.stringify(covidRows, null, 2);
             const byDay = _.groupBy(covidRows, row => row[0]);
