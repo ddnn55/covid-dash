@@ -41,8 +41,32 @@ const rows2smoothDailyRateByRegion = (rows, populations) => {
     return smoothDailyRateByRegion;
 };
 
-const union = (a, b) => { };
-const subset = (set, keys) => {};
+const union = (a, b) => { 
+    const { byRegion: byRegionA, byDay: byDayA } = a;
+    const { byRegion: byRegionB, byDay: byDayB } = b;
+    console.log({byRegionA, byRegionB, byDayA, byDayB});
+ };
+const byRegionFilterByRegions = (byRegion, regions) => {
+    const newByRegion = {};
+    regions.forEach(region => {
+        newByRegion[region] = byRegion[region];
+    });
+    return newByRegion;
+};
+const byDayFilterByRegions = (byDay, regions) => {
+    const newByDay = {};
+    Object.keys(byDay).forEach(day => {
+        newByDay[day] = byDay[day].filter(([__, region, ___, ____]) => regions.indexOf(region) > -1);
+    });
+    return newByDay;
+};
+const subset = (set, regions) => {
+    console.log({set, regions})
+    return {
+        byDay: byDayFilterByRegions(set.byDay, regions),
+        byRegion: byRegionFilterByRegions(set.byRegion, regions)
+    };
+};
 
 const set2highcharts = set => _.sortBy(Object.keys(set.byRegion).map(region => ({
     name: region,
@@ -78,22 +102,20 @@ const sevenDayAverage = (rows, r) => {
     const countyRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
     // console.log({countyRows});
 
-    const countiesByDay = _.groupBy(countyRows, row => row[0]);
-    const countiesByRegion = _.groupBy(countyRows, row => row[1]);
-    console.log({ countiesByRegion })
-
     // table.innerHTML = JSON.stringify(stateRows, null, 2);
     const statesByDay = _.groupBy(stateRows, row => row[0]);
+    const countiesByDay = _.groupBy(countyRows, row => row[0]);
     // console.log(statesByDay)
 
     const statesByRegion = rows2smoothDailyRateByRegion(stateRows, statePopulations);
-    console.log({ statesByRegion });
+    const countiesByRegion = rows2smoothDailyRateByRegion(countyRows, countyPopulations);
+    console.log({ countiesByRegion });
 
     const statesSet   = { byRegion: statesByRegion,   byDay: statesByDay   };
     const countiesSet = { byRegion: countiesByRegion, byDay: countiesByDay };
 
     const displaySet = union(statesSet, subset(countiesSet, ['Los Angeles', 'Cook', 'Champaign']));
-    console.log({ displaySet });
+    console.log({ displaySet, statesSet, countiesSet });
 
     const highchartsSeries = set2highcharts(statesSet);
     console.log({ highchartsSeries })
