@@ -14,7 +14,8 @@ const loadDsv = async (url, separator) => {
     return dsvText.split('\n').slice(1).map(line => line.split(separator));
 };
 
-const loadCovidRows = async url => (await loadDsv(url, ',')).map(([day, region, __, positives, deaths]) => [day, region, +positives, +deaths]).filter(row => row[0] >= minDay);
+const loadStateRows = async url => (await loadDsv(url, ',')).map(([day, state, __, positives, deaths]) => [day, null, state, +positives, +deaths]).filter(row => row[0] >= minDay);
+const loadCountyRows = async url => (await loadDsv(url, ',')).map(([day, county, state, fips, positives, deaths]) => [day, county, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 
 const rows2smoothDailyRateByRegion = (rows, populations) => {
     const smoothDailyRateByRegion = _.groupBy(rows, row => row[1]);
@@ -96,17 +97,20 @@ const sevenDayAverage = (rows, r) => {
     // console.log(statePopulations)
 
     const countyPopulationRows = await loadDsv("us-counties-population-estimate-2019.tsv", "\t");
-    let countyPopulations = {};
+    console.log({countyPopulationRows})
+    let selectedCountyPopulations = {};
     countyPopulationRows.forEach(([county, state, pop]) => {
-        countyPopulations[state] = countyPopulations[state] || {};
-        countyPopulations[state][county] = +pop.split(',').join('');
+        if(selectedCounties.has(county, state)) {
+            selectedCountyPopulations[county] = +pop.split(',').join('');
+        }
     });
-    console.log({countyPopulations})
+    
+    console.log({selectedCountyPopulations, statePopulations})
 
-    const stateRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
-    const allCountyRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
+    const stateRows = await loadStateRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
+    const allCountyRows = await loadCountyRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
     console.log({allCountyRows});
-    const selectedCountyRows = allCountyRows.filter(([__, county, ___, ____]) => selectedCounties.has(county));
+    const selectedCountyRows = allCountyRows.filter(([__, county, ___, ____]) => selectedCounties.has(county, ));
     console.log({selectedCountyRows})
 
     const regionRows = _.sortBy(stateRows.concat(selectedCountyRows), row => row[0]);
