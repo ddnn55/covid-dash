@@ -17,8 +17,27 @@ const loadDsv = async (url, separator) => {
 const loadStateRows = async url => (await loadDsv(url, ',')).map(([day, state, __, positives, deaths]) => [day, null, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 const loadCountyRows = async url => (await loadDsv(url, ',')).map(([day, county, state, fips, positives, deaths]) => [day, county, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 
+const rows2regionalTree = rows => {
+    const regionalTree = {};
+    rows.forEach(row => {
+        const [day, county, state, positives, deaths] = row;
+        regionalTree[state] = regionalTree[state] || {
+            rows: [],
+            counties: {}
+        };
+        if(county === null) {
+            regionalTree[state].rows.push(row); 
+        }
+        else {
+            regionalTree[state].counties[county] = regionalTree[state].counties[county] || [];
+            regionalTree[state].counties[county].push(row);
+        }
+    });
+    return regionalTree;
+};
 const rows2smoothDailyRateByRegion = (rows, populations) => {
-    const smoothDailyRateByRegion = _.groupBy(rows, row => row[1]);
+    const smoothDailyRateRegionalTree = rows2regionalTree(rows);
+    console.log({smoothDailyRateRegionalTree});
     for (const region in smoothDailyRateByRegion) {
 
         // calculate daily change
@@ -90,22 +109,24 @@ const sevenDayAverage = (rows, r) => {
 (async () => {
 
     const statePopulationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
-    let statePopulations = {};
-    statePopulationRows.forEach(([name, pop]) => {
-        statePopulations[name] = +pop.split(',').join('');
+    let populations = {};
+    statePopulationRows.forEach(([state, pop]) => {
+        populations[state] = {
+            population: +pop.split(',').join(''),
+            counties: {}
+        };
     });
     // console.log(statePopulations)
 
     const countyPopulationRows = await loadDsv("us-counties-population-estimate-2019.tsv", "\t");
     console.log({countyPopulationRows})
-    let selectedCountyPopulations = {};
     countyPopulationRows.forEach(([county, state, pop]) => {
         if(selectedCounties.has(county, state)) {
-            selectedCountyPopulations[county] = +pop.split(',').join('');
+            populations[state].counties[county] = +pop.split(',').join('');
         }
     });
     
-    console.log({selectedCountyPopulations, statePopulations})
+    console.log({populations})
 
     const stateRows = await loadStateRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
     const allCountyRows = await loadCountyRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
@@ -138,7 +159,7 @@ const sevenDayAverage = (rows, r) => {
     Highcharts.chart(chartContainer, {
         xAxis: {
             // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            categories: Object.keys(statesByDay),
+            categories: Object.keys(byDay),
         },
         yAxis: {
             floor: 0
