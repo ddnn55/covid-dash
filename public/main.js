@@ -1,5 +1,10 @@
 const minDay = "2020-03-01";
 
+const selectedCounties = new Set();
+selectedCounties.add('Los Angeles');
+selectedCounties.add('Cook');
+selectedCounties.add('Champaign');
+
 const chartContainer = document.querySelector('.chart-container');
 const table = document.querySelector('.table');
 
@@ -99,8 +104,12 @@ const sevenDayAverage = (rows, r) => {
     console.log({countyPopulations})
 
     const stateRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
-    const countyRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
-    // console.log({countyRows});
+    const allCountyRows = await loadCovidRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
+    console.log({allCountyRows});
+    const selectedCountyRows = allCountyRows.filter(([__, county, ___, ____]) => selectedCounties.has(county));
+    console.log({selectedCountyRows})
+
+    
 
     // table.innerHTML = JSON.stringify(stateRows, null, 2);
     const statesByDay = _.groupBy(stateRows, row => row[0]);
