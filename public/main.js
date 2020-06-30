@@ -109,24 +109,26 @@ const sevenDayAverage = (rows, r) => {
     const selectedCountyRows = allCountyRows.filter(([__, county, ___, ____]) => selectedCounties.has(county));
     console.log({selectedCountyRows})
 
-    
+    const regionRows = _.sortBy(stateRows.concat(selectedCountyRows), row => row[0]);
+    console.log({regionRows})
 
     // table.innerHTML = JSON.stringify(stateRows, null, 2);
-    const statesByDay = _.groupBy(stateRows, row => row[0]);
-    const countiesByDay = _.groupBy(countyRows, row => row[0]);
+    const byDay = _.groupBy(regionRows, row => row[0]);
+    // const countiesByDay = _.groupBy(countyRows, row => row[0]);
     // console.log(statesByDay)
 
-    const statesByRegion = rows2smoothDailyRateByRegion(stateRows, statePopulations);
-    const countiesByRegion = rows2smoothDailyRateByRegion(countyRows, countyPopulations);
-    console.log({ countiesByRegion });
+    // const statesByRegion = rows2smoothDailyRateByRegion(stateRows, statePopulations);
+    // const countiesByRegion = rows2smoothDailyRateByRegion(countyRows, countyPopulations);
+    const byRegion = rows2smoothDailyRateByRegion(regionRows, populations);
+    console.log({ byRegion });
 
-    const statesSet   = { byRegion: statesByRegion,   byDay: statesByDay   };
-    const countiesSet = { byRegion: countiesByRegion, byDay: countiesByDay };
+    // const statesSet   = { byRegion: statesByRegion,   byDay: statesByDay   };
+    // const countiesSet = { byRegion: countiesByRegion, byDay: countiesByDay };
 
-    const displaySet = union(statesSet, subset(countiesSet, ['Los Angeles', 'Cook', 'Champaign']));
-    console.log({ displaySet, statesSet, countiesSet });
+    const displaySet = {byRegion, byDay};
+    console.log({ displaySet });
 
-    const highchartsSeries = set2highcharts(statesSet);
+    const highchartsSeries = set2highcharts(displaySet);
     console.log({ highchartsSeries })
 
     Highcharts.chart(chartContainer, {
