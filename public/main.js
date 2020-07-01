@@ -107,7 +107,7 @@ const subset = (set, regions) => {
 
 const set2highcharts = set => _.sortBy(Object.keys(set.byRegion).map(region => ({
     name: region,
-    data: Object.keys(set.byDay).map(day => set.byRegion[region][day] ? set.byRegion[region][day][3] : 0)
+    data: Object.keys(set.byDay).map(day => set.byRegion[region][day] ? set.byRegion[region][day][1] : 0)
 })), regionSeries => regionSeries.name);
 
 const sevenDayAverage = (rows, r) => {
