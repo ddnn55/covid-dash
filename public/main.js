@@ -181,7 +181,7 @@ const sevenDayAverage = (rows, r) => {
     const highchartsSeries = set2highcharts(displaySet);
     console.log({ highchartsSeries })
 
-    Highcharts.chart(chartContainer, {
+    const chart = Highcharts.chart(chartContainer, {
         xAxis: {
             // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
             categories: Object.keys(byDay),
@@ -213,4 +213,7 @@ const sevenDayAverage = (rows, r) => {
             align: 'right'
         }
     });
+    console.log(chart);
+    
+    window.chart = chart;
 })();
