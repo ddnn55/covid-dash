@@ -26,14 +26,13 @@ const rows2smoothDailyRate = ([county, state], rows, populations) => {
         // const sevenDayAverage = 
         return [
             row[0],
-            row[1],
             changeCases
         ];
     });
 
     // calculate 7 day average change per capita
     const smoothDailyChange = dailyChange.map((row, r) => {
-        const [day, _county, _state, _positives, _deaths] = row;
+        const [day, _positives] = row;
         const population = county === null ? populations[state].population : populations[state].counties[county];
         return [
             day,
@@ -44,6 +43,10 @@ const rows2smoothDailyRate = ([county, state], rows, populations) => {
     });
 
     const byDay = _.keyBy(smoothDailyChange, row => row[0]);
+
+    if(county === 'Cook') {
+        debugger;
+    }
 
     return byDay;
 };
@@ -113,7 +116,7 @@ const set2highcharts = set => _.sortBy(Object.keys(set.byRegion).map(region => (
 const sevenDayAverage = (rows, r) => {
     const startIndex = Math.max(0, r - 6);
     const windowRows = rows.slice(startIndex, r + 1);
-    const sum = _.sum(windowRows.map(row => row[2]));
+    const sum = _.sum(windowRows.map(row => row[1]));
     const count = (r + 1 - startIndex);
     return sum / count;
 };
