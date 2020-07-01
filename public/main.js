@@ -136,9 +136,9 @@ const sevenDayAverage = (rows, r) => {
     const countyPopulationRows = await loadDsv("us-counties-population-estimate-2019.tsv", "\t");
     console.log({countyPopulationRows})
     countyPopulationRows.forEach(([county, state, pop]) => {
-        if(selectedCounties.has(county, state)) {
+        // if(selectedCounties.has(JSON.stringify([county, state]))) {
             populations[state].counties[county] = +pop.split(',').join('');
-        }
+        // }
     });
     
     console.log({populations})
