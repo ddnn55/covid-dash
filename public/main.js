@@ -1,9 +1,9 @@
 const minDay = "2020-03-01";
 
 const selectedCounties = new Set();
-selectedCounties.add('Los Angeles');
-selectedCounties.add('Cook');
-selectedCounties.add('Champaign');
+selectedCounties.add(JSON.stringify(['Los Angeles', 'California']));
+selectedCounties.add(JSON.stringify(['Cook', 'Illinois']));
+selectedCounties.add(JSON.stringify(['Champaign', 'Illinois']));
 
 const chartContainer = document.querySelector('.chart-container');
 const table = document.querySelector('.table');
@@ -136,9 +136,7 @@ const sevenDayAverage = (rows, r) => {
     const countyPopulationRows = await loadDsv("us-counties-population-estimate-2019.tsv", "\t");
     console.log({countyPopulationRows})
     countyPopulationRows.forEach(([county, state, pop]) => {
-        // if(selectedCounties.has(JSON.stringify([county, state]))) {
-            populations[state].counties[county] = +pop.split(',').join('');
-        // }
+        populations[state].counties[county] = +pop.split(',').join('');
     });
     
     console.log({populations})
@@ -146,7 +144,7 @@ const sevenDayAverage = (rows, r) => {
     const stateRows = await loadStateRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
     const allCountyRows = await loadCountyRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
     console.log({allCountyRows});
-    const selectedCountyRows = allCountyRows.filter(([__, county, ___, ____]) => selectedCounties.has(county, ));
+    const selectedCountyRows = allCountyRows.filter(([__, county, state, ____]) => selectedCounties.has(JSON.stringify([county, state])));
     console.log({selectedCountyRows})
 
     const regionRows = _.sortBy(stateRows.concat(selectedCountyRows), row => row[0]);
