@@ -17,6 +17,10 @@ const loadDsv = async (url, separator) => {
 const loadStateRows = async url => (await loadDsv(url, ',')).map(([day, state, __, positives, deaths]) => [day, null, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 const loadCountyRows = async url => (await loadDsv(url, ',')).map(([day, county, state, fips, positives, deaths]) => [day, county, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 
+const findCountyPopulation = ([county, state], populations) => {
+    let countyKey = `${county} County`;
+    return populations[state].counties[countyKey];
+};
 
 const rows2smoothDailyRate = ([county, state], rows, populations) => {
 
@@ -31,9 +35,9 @@ const rows2smoothDailyRate = ([county, state], rows, populations) => {
     });
 
     // calculate 7 day average change per capita
+    const population = county === null ? populations[state].population : findCountyPopulation([county, state], populations);
     const smoothDailyChange = dailyChange.map((row, r) => {
         const [day, _positives] = row;
-        const population = county === null ? populations[state].population : populations[state].counties[county];
         return [
             day,
             // row[1],
@@ -43,10 +47,6 @@ const rows2smoothDailyRate = ([county, state], rows, populations) => {
     });
 
     const byDay = _.keyBy(smoothDailyChange, row => row[0]);
-
-    if(county === 'Cook') {
-        debugger;
-    }
 
     return byDay;
 };
