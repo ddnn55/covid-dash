@@ -17,7 +17,38 @@ const loadDsv = async (url, separator) => {
 const loadStateRows = async url => (await loadDsv(url, ',')).map(([day, state, __, positives, deaths]) => [day, null, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 const loadCountyRows = async url => (await loadDsv(url, ',')).map(([day, county, state, fips, positives, deaths]) => [day, county, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 
-const rows2regionalTree = rows => {
+
+const rows2smoothDailyRate = ([county, state], rows, populations) => {
+
+    // calculate daily change
+    const dailyChange = rows.map((row, r) => {
+        const changeCases = r === 0 ? row[3] : row[3] - rows[r - 1][3];
+        // const sevenDayAverage = 
+        return [
+            row[0],
+            row[1],
+            changeCases
+        ];
+    });
+
+    // calculate 7 day average change per capita
+    const smoothDailyChange = dailyChange.map((row, r) => {
+        const [day, _county, _state, _positives, _deaths] = row;
+        const population = county === null ? populations[state].population : populations[state].counties[county];
+        return [
+            day,
+            // row[1],
+            // row[2],
+            100000 * sevenDayAverage(dailyChange, r) / population
+        ];
+    });
+
+    const byDay = _.keyBy(smoothDailyChange, row => row[0]);
+
+    return byDay;
+};
+
+const rows2smoothDailyRateByRegion = (rows, populations) => {
     const regionalTree = {};
     rows.forEach(row => {
         const [day, county, state, positives, deaths] = row;
@@ -33,38 +64,19 @@ const rows2regionalTree = rows => {
             regionalTree[state].counties[county].push(row);
         }
     });
-    return regionalTree;
-};
-const rows2smoothDailyRateByRegion = (rows, populations) => {
-    const smoothDailyRateRegionalTree = rows2regionalTree(rows);
-    console.log({smoothDailyRateRegionalTree});
-    for (const region in smoothDailyRateByRegion) {
 
-        // calculate daily change
-        smoothDailyRateByRegion[region] = smoothDailyRateByRegion[region].map((row, r) => {
-            const changeCases = r === 0 ? row[2] : row[2] - smoothDailyRateByRegion[region][r - 1][2];
-            // const sevenDayAverage = 
-            return [
-                row[0],
-                row[1],
-                changeCases
-            ];
+    const byRegion = {};
+
+    Object.keys(regionalTree).map(state => {
+        byRegion[state] = rows2smoothDailyRate([null, state], regionalTree[state].rows, populations);
+        Object.keys(regionalTree[state].counties).map(county => {
+            byRegion[`${county}, ${state}`] = rows2smoothDailyRate([county, state], regionalTree[state].counties[county], populations);
         });
+    });
 
-        // calculate 7 day average change per capita
-        smoothDailyRateByRegion[region] = smoothDailyRateByRegion[region].map((row, r) => {
-            return [
-                row[0],
-                row[1],
-                row[2],
-                100000 * sevenDayAverage(smoothDailyRateByRegion[region], r) / populations[region]
-            ];
-        });
-
-        smoothDailyRateByRegion[region] = _.keyBy(smoothDailyRateByRegion[region], row => row[0]);
-    };
-    return smoothDailyRateByRegion;
+    return byRegion;
 };
+
 
 const union = (a, b) => { 
     const { byRegion: byRegionA, byDay: byDayA } = a;
