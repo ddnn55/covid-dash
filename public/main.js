@@ -1,5 +1,19 @@
 const minDay = "2020-03-01";
 
+const regions = JSON.parse(decodeURIComponent(window.location.search.slice(1)));
+console.log({regions});
+
+(async () => {
+    const result = await fetch(`https://covid-19.datasettes.com/covid.csv?`
+    +`sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+order+by+date+desc+limit+101`
+    +`&p0=Champaign`
+    +`&p1=Illinois`
+    +`&_size=max`);
+    const csv = await result.text();
+    console.log(csv)
+})();
+
+
 const selectedCounties = new Set();
 selectedCounties.add(JSON.stringify(['Los Angeles', 'California']));
 selectedCounties.add(JSON.stringify(['Cook', 'Illinois']));
