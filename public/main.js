@@ -20,23 +20,6 @@ const getCountyData = async county => {
     };
 };
 
-(async () => {
-    const regionsData = await Promise.all(requestedRegions.map(getCountyData));
-    console.log({regionsData})
-    const newRegionRows = [];
-    regionsData.forEach(regionData => {
-        regionData.rows.forEach(regionRow => {
-            const rowObj = {};
-            regionRow.forEach((column, c) => rowObj[regionData.columnNames[c]] = column);
-            rowObj.cases = +rowObj.cases;
-            rowObj.deaths = +rowObj.deaths;
-            // console.log(regionData.columnNames)
-            // console.log({regionRow})
-            console.log({rowObj})
-        });
-    });
-})();
-
 
 const selectedCounties = new Set();
 requestedRegions.forEach(requestedCounty => selectedCounties.add(JSON.stringify(requestedCounty)));
@@ -173,6 +156,36 @@ const sevenDayAverage = (rows, r) => {
 
 (async () => {
 
+
+
+
+
+    const regionsData = await Promise.all(requestedRegions.map(getCountyData));
+    console.log({regionsData})
+    const newRegionRows = [];
+    regionsData.forEach(regionData => {
+        regionData.rows.forEach(regionRow => {
+            const rowObj = {};
+            regionRow.forEach((column, c) => rowObj[regionData.columnNames[c]] = column);
+            rowObj.cases = +rowObj.cases;
+            rowObj.deaths = +rowObj.deaths;
+            // console.log(regionData.columnNames)
+            // console.log({regionRow})
+            // console.log({rowObj})
+            newRegionRows.push([
+                rowObj.date,
+                rowObj.county,
+                rowObj.state,
+                rowObj.cases,
+                rowObj.deaths
+            ]);
+        });
+    });
+
+
+
+
+
     const statePopulationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
     let populations = {};
     statePopulationRows.forEach(([state, pop]) => {
@@ -197,8 +210,9 @@ const sevenDayAverage = (rows, r) => {
     const selectedCountyRows = allCountyRows.filter(([__, county, state, ____]) => selectedCounties.has(JSON.stringify([county, state])));
     console.log({selectedCountyRows})
 
-    const regionRows = _.sortBy(stateRows.concat(selectedCountyRows), row => row[0]);
+    const regionRows = _.sortBy(selectedCountyRows, row => row[0]);
     console.log({regionRows})
+    console.log({newRegionRows})
 
     const byDay = _.groupBy(regionRows, row => row[0]);
 
