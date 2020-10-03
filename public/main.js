@@ -39,7 +39,6 @@ const loadDsv = async (url, separator) => {
 };
 
 const loadStateRows = async url => (await loadDsv(url, ',')).map(([day, state, __, positives, deaths]) => [day, null, state, +positives, +deaths]).filter(row => row[0] >= minDay);
-const loadCountyRows = async url => (await loadDsv(url, ',')).map(([day, county, state, fips, positives, deaths]) => [day, county, state, +positives, +deaths]).filter(row => row[0] >= minDay);
 
 const findCountyNameAndPopulation = ([shortCountyName, state], populations) => {
     let longCountyName = `${shortCountyName} County`;
@@ -115,34 +114,6 @@ const rows2smoothDailyRateByRegion = (rows, populations) => {
     return byRegion;
 };
 
-
-const union = (a, b) => { 
-    const { byRegion: byRegionA, byDay: byDayA } = a;
-    const { byRegion: byRegionB, byDay: byDayB } = b;
-    console.log({byRegionA, byRegionB, byDayA, byDayB});
- };
-const byRegionFilterByRegions = (byRegion, regions) => {
-    const newByRegion = {};
-    regions.forEach(region => {
-        newByRegion[region] = byRegion[region];
-    });
-    return newByRegion;
-};
-const byDayFilterByRegions = (byDay, regions) => {
-    const newByDay = {};
-    Object.keys(byDay).forEach(day => {
-        newByDay[day] = byDay[day].filter(([__, region, ___, ____]) => regions.indexOf(region) > -1);
-    });
-    return newByDay;
-};
-const subset = (set, regions) => {
-    console.log({set, regions})
-    return {
-        byDay: byDayFilterByRegions(set.byDay, regions),
-        byRegion: byRegionFilterByRegions(set.byRegion, regions)
-    };
-};
-
 const set2highcharts = set => _.sortBy(Object.keys(set.byRegion).map(region => ({
     name: region,
     data: Object.keys(set.byDay).map(day => set.byRegion[region][day] ? set.byRegion[region][day][1] : 0)
@@ -208,13 +179,7 @@ const sevenDayAverage = (rows, r) => {
     console.log({populations})
 
     const stateRows = await loadStateRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
-    // const allCountyRows = await loadCountyRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
-    // console.log({allCountyRows});
-    // const selectedCountyRows = allCountyRows.filter(([__, county, state, ____]) => selectedCounties.has(JSON.stringify([county, state])));
-    // console.log({selectedCountyRows})
-
-    // const oldRegionRows = _.sortBy(selectedCountyRows, row => row[0]);
-
+    
     const regionRows = newRegionRows;
 
     // console.log({oldRegionRows})
@@ -229,6 +194,7 @@ const sevenDayAverage = (rows, r) => {
     console.log({ displaySet });
 
     const highchartsSeries = set2highcharts(displaySet);
+    // debugger;
     console.log({ highchartsSeries })
 
     Highcharts.chart(chartContainer, {
