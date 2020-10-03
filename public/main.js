@@ -123,7 +123,7 @@ const rows2smoothDailyRateByRegion = (rows, populations) => {
 
 const set2highcharts = set => _.sortBy(Object.keys(set.byRegion).map(region => ({
     name: region,
-    data: Object.keys(set.byDay).map(day => set.byRegion[region][day] ? set.byRegion[region][day][1] : 0)
+    data: Object.keys(set.byDay).map(day => [new Date(day).getTime(), set.byRegion[region][day] ? set.byRegion[region][day][1] : 0])
 })), regionSeries => regionSeries.name);
 
 const sevenDayAverage = (rows, r) => {
@@ -187,15 +187,16 @@ const sevenDayAverage = (rows, r) => {
 
     const displaySet = {byRegion, byDay};
     console.log({ displaySet });
+    const times = Object.keys(byDay).map(day => new Date(day).getTime());
 
     const highchartsSeries = set2highcharts(displaySet);
     // debugger;
     console.log({ highchartsSeries })
 
+
     Highcharts.chart(chartContainer, {
         xAxis: {
-            // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-            categories: Object.keys(byDay),
+            type: 'datetime'
         },
         yAxis: {
             floor: 0
