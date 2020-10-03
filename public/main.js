@@ -211,12 +211,12 @@ const sevenDayAverage = (rows, r) => {
     const selectedCountyRows = allCountyRows.filter(([__, county, state, ____]) => selectedCounties.has(JSON.stringify([county, state])));
     console.log({selectedCountyRows})
 
-    const regionRows = _.sortBy(selectedCountyRows, row => row[0]);
+    const oldRegionRows = _.sortBy(selectedCountyRows, row => row[0]);
 
+    const regionRows = newRegionRows;
 
-
+    console.log({oldRegionRows})
     console.log({regionRows})
-    console.log({newRegionRows})
 
     const byDay = _.groupBy(regionRows, row => row[0]);
 
