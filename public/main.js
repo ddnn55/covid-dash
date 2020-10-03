@@ -2,7 +2,7 @@ const minDay = "2020-03-01";
 
 const requestedRegionsStr = decodeURIComponent(window.location.search.slice(1));
 if (requestedRegionsStr.length === 0) {
-  document.querySelector('.instructions').style.display = 'block';
+  document.querySelector(".instructions").style.display = "block";
 } else {
   const requestedRegions = requestedRegionsStr
     .split(";")
@@ -275,6 +275,22 @@ if (requestedRegionsStr.length === 0) {
         enabled: true,
         layout: "vertical",
         align: "right",
+      },
+      responsive: {
+        rules: [
+          {
+            condition: {
+              maxWidth: 800,
+            },
+            chartOptions: {
+              legend: {
+                align: "center",
+                verticalAlign: "bottom",
+                layout: "horizontal",
+              },
+            },
+          },
+        ],
       },
     });
   })();
