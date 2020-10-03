@@ -8,6 +8,7 @@
     <style>
         body {
             margin: 0;
+            overflow: hidden;
         }
         .header {
             text-align: center;
@@ -25,55 +26,45 @@
         }
         .layout {
             display: flex;
-            flex-direction: row;
-
-            --region-selector-width: 200px;
-        }
-        .left-column {
-            display: flex;
             flex-direction: column;
-            height: 100vh;
-            width: calc(100vw - var(--region-selector-width));
+            /* height: 100vh; */
         }
-        .right-column {
-            flex: 1;
-            /* background-color: lightyellow; */
-            position: relative;
+        .date-range {
+            text-align: center;
         }
         .chart-container {
             flex: 1;
-        }
-        .region-selector {
-            height: 100%;
-            background-color: lightgreen;
         }
     </style>
 
 </head>
 
 <body>
-
     <div class="layout">
-
-        <div class="left-column">
-            <div class="header">
-                <div class="title">
-                    COVID-19: New Positive Tests per 100k People, 7 Day Avg., by U.S. Region
-                </div>
-                <div class="subtitle">Data: <a href="https://github.com/nytimes/covid-19-data">NYTimes</a>, <a href="https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States_by_population#State_rankings">Wikipedia</a>. Fork/contribute on <a href="https://github.com/gimlids/covid-dash/issues">GitHub</a>.
-                </div>
+        <div class="header">
+            <div class="title">
+                Covid cases / 100k, 7 Day Average
             </div>
-        
-            <div class="chart-container"></div>
+            <div class="subtitle">Data: <a href="https://covid-19.datasettes.com/covid">datasette/nytimes</a>, <a href="https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States_by_population#State_rankings">Wikipedia</a>. Code: <a href="https://github.com/gimlids/covid-dash/issues">GitHub</a>.
+            </div>
         </div>
-
-        <div class="right-column">
-            <div class="region-selector"></div>
+        <div class="instructions" style="display: none">
+            <p>No regions selected.</p>
+            <p>
+                Select regions by putting them in the query string, for example:
+            </p>
+            <ul>
+                <li><a href="/?Cook,Illinois">/?Cook,Illinois</a></li>
+                <li><a href="/?Cook,Illinois;New+York">/?Cook,Illinois;New+York</a></li>
+                <li><a href="/?Cook,Illinois;New+York;Los+Angeles,California;California">/?Cook,Illinois;New+York;Los+Angeles,California;California</a></li>
+            </ul>
         </div>
-
+        <div class="date-range"></div>
+        <div class="chart-container"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"></script>
+    <script src="https://cdn.date-fns.org/2.16.1/date_fns.min.js"></script>
     <script src="lib/highcharts.js"></script>
     <script src="main.js"></script>
 </body>
