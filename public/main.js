@@ -262,6 +262,9 @@ if (requestedRegionsStr.length === 0) {
       },
       yAxis: {
         floor: 0,
+        title: {
+            enabled: false
+        }
       },
 
       chart: {
@@ -297,6 +300,14 @@ if (requestedRegionsStr.length === 0) {
 
             // startOnTick: true,
             // endOnTick: true,
+                },
+                yAxis: {
+
+        labels: {
+            // align: 'center'
+            x: 15,
+            y: 12
+        }
                 },
               legend: {
                 align: "center",
