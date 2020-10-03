@@ -51,7 +51,6 @@ if (requestedRegionsStr.length === 0) {
   };
 
   const chartContainer = document.querySelector(".chart-container");
-  const table = document.querySelector(".table");
 
   const loadDsv = async (url, separator) => {
     const result = await fetch(url);
@@ -61,17 +60,6 @@ if (requestedRegionsStr.length === 0) {
       .slice(1)
       .map((line) => line.split(separator));
   };
-
-  const loadStateRows = async (url) =>
-    (await loadDsv(url, ","))
-      .map(([day, state, __, positives, deaths]) => [
-        day,
-        null,
-        state,
-        +positives,
-        +deaths,
-      ])
-      .filter((row) => row[0] >= minDay);
 
   const findCountyNameAndPopulation = (
     [shortCountyName, state],
@@ -165,6 +153,7 @@ if (requestedRegionsStr.length === 0) {
     return byRegion;
   };
 
+
   const set2highcharts = (set) =>
     _.sortBy(
       Object.keys(set.byRegion).map((region) => ({
@@ -242,6 +231,10 @@ if (requestedRegionsStr.length === 0) {
     console.log({ regionRows });
 
     const byDay = _.groupBy(regionRows, (row) => row[0]);
+
+    const days = Object.keys(byDay);
+    const dateRange = [_.min(days), _.max(days)];
+    document.querySelector('.date-range').innerHTML = `${dateRange[0]} to ${dateRange[1]}`;
 
     const byRegion = rows2smoothDailyRateByRegion(regionRows, populations);
     console.log({ byRegion });
