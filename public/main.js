@@ -206,16 +206,16 @@ const sevenDayAverage = (rows, r) => {
     console.log({populations})
 
     const stateRows = await loadStateRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
-    const allCountyRows = await loadCountyRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
-    console.log({allCountyRows});
-    const selectedCountyRows = allCountyRows.filter(([__, county, state, ____]) => selectedCounties.has(JSON.stringify([county, state])));
-    console.log({selectedCountyRows})
+    // const allCountyRows = await loadCountyRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv");
+    // console.log({allCountyRows});
+    // const selectedCountyRows = allCountyRows.filter(([__, county, state, ____]) => selectedCounties.has(JSON.stringify([county, state])));
+    // console.log({selectedCountyRows})
 
-    const oldRegionRows = _.sortBy(selectedCountyRows, row => row[0]);
+    // const oldRegionRows = _.sortBy(selectedCountyRows, row => row[0]);
 
     const regionRows = newRegionRows;
 
-    console.log({oldRegionRows})
+    // console.log({oldRegionRows})
     console.log({regionRows})
 
     const byDay = _.groupBy(regionRows, row => row[0]);
