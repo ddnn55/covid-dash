@@ -1,13 +1,11 @@
 const minDay = "2020-03-01";
 
 const str = decodeURIComponent(window.location.search.slice(1));
-console.log({str})
 const requestedRegions = str.split(';').map(regionStr => regionStr.split(',').map(regionComponentStr => regionComponentStr.replace(/\+/g, ' ')));
-console.log({requestedRegions});
 
 const getCountyData = async county => {
     const result = await fetch(`https://covid-19.datasettes.com/covid.csv?`
-    +`sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%222020-03-01%22+order+by+date+desc`
+    +`sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc`
     +`&p0=${encodeURIComponent(county[0])}`
     +`&p1=${encodeURIComponent(county[1])}`
     +`&_size=max`);
@@ -22,12 +20,8 @@ const getCountyData = async county => {
     };
 };
 
-
 const selectedCounties = new Set();
 requestedRegions.forEach(requestedCounty => selectedCounties.add(JSON.stringify(requestedCounty)));
-// selectedCounties.add(JSON.stringify(['Los Angeles', 'California']));
-// selectedCounties.add(JSON.stringify(['Cook', 'Illinois']));
-// selectedCounties.add(JSON.stringify(['Champaign', 'Illinois']));
 
 const chartContainer = document.querySelector('.chart-container');
 const table = document.querySelector('.table');
@@ -49,7 +43,6 @@ const processRegionRows = ([county, state], rows, populations) => {
     // calculate daily change
     const dailyChange = rows.map((row, r) => {
         const changeCases = r === 0 ? row[3] : row[3] - rows[r - 1][3];
-        // const sevenDayAverage = 
         return [
             row[0],
             changeCases
@@ -128,11 +121,6 @@ const sevenDayAverage = (rows, r) => {
 };
 
 (async () => {
-
-
-
-
-
     const regionsData = await Promise.all(requestedRegions.map(getCountyData));
     console.log({regionsData})
     let newRegionRows = [];
@@ -142,9 +130,6 @@ const sevenDayAverage = (rows, r) => {
             regionRow.forEach((column, c) => rowObj[regionData.columnNames[c]] = column);
             rowObj.cases = +rowObj.cases;
             rowObj.deaths = +rowObj.deaths;
-            // console.log(regionData.columnNames)
-            // console.log({regionRow})
-            // console.log({rowObj})
             newRegionRows.push([
                 rowObj.date,
                 rowObj.county,
@@ -155,10 +140,6 @@ const sevenDayAverage = (rows, r) => {
         });
     });
     newRegionRows = _.sortBy(newRegionRows, row => row[0]);
-
-
-
-
 
     const statePopulationRows = await loadDsv("us-states-population-april-1-2020.tsv", "\t");
     let populations = {};
