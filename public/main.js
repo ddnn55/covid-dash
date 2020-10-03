@@ -149,7 +149,6 @@ const sevenDayAverage = (rows, r) => {
             counties: {}
         };
     });
-    // console.log(statePopulations)
 
     const countyPopulationRows = await loadDsv("us-counties-population-estimate-2019.tsv", "\t");
     console.log({countyPopulationRows})
@@ -163,7 +162,6 @@ const sevenDayAverage = (rows, r) => {
     
     const regionRows = newRegionRows;
 
-    // console.log({oldRegionRows})
     console.log({regionRows})
 
     const byDay = _.groupBy(regionRows, row => row[0]);
