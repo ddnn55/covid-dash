@@ -1,7 +1,7 @@
 const minDay = "2020-03-01";
 
-const requestedCounties = JSON.parse(decodeURIComponent(window.location.search.slice(1)));
-console.log({requestedCounties});
+const requestedRegions = JSON.parse(decodeURIComponent(window.location.search.slice(1)));
+console.log({requestedRegions});
 
 const getCountyData = async county => {
     const result = await fetch(`https://covid-19.datasettes.com/covid.csv?`
@@ -9,8 +9,11 @@ const getCountyData = async county => {
     +`&p0=${encodeURIComponent(county[0])}`
     +`&p1=${encodeURIComponent(county[1])}`
     +`&_size=max`);
-    const csv = await result.text();
-    const parsedRows = csv.replace(/\r/g, '').split('\n').map(line => line.split(','));
+    let csv = (await result.text()).replace(/\r/g, '');
+    if(csv[csv.length-1] === '\n') {
+        csv = csv.substring(0, csv.length-1);
+    }
+    const parsedRows = csv.split('\n').map(line => line.split(','));
     return {
         columnNames: parsedRows[0],
         rows: parsedRows.slice(1)
@@ -18,13 +21,25 @@ const getCountyData = async county => {
 };
 
 (async () => {
-    const countiesData = await Promise.all(requestedCounties.map(getCountyData));
-    console.log({countiesData})
+    const regionsData = await Promise.all(requestedRegions.map(getCountyData));
+    console.log({regionsData})
+    const newRegionRows = [];
+    regionsData.forEach(regionData => {
+        regionData.rows.forEach(regionRow => {
+            const rowObj = {};
+            regionRow.forEach((column, c) => rowObj[regionData.columnNames[c]] = column);
+            rowObj.cases = +rowObj.cases;
+            rowObj.deaths = +rowObj.deaths;
+            // console.log(regionData.columnNames)
+            // console.log({regionRow})
+            console.log({rowObj})
+        });
+    });
 })();
 
 
 const selectedCounties = new Set();
-requestedCounties.forEach(requestedCounty => selectedCounties.add(JSON.stringify(requestedCounty)));
+requestedRegions.forEach(requestedCounty => selectedCounties.add(JSON.stringify(requestedCounty)));
 // selectedCounties.add(JSON.stringify(['Los Angeles', 'California']));
 // selectedCounties.add(JSON.stringify(['Cook', 'Illinois']));
 // selectedCounties.add(JSON.stringify(['Champaign', 'Illinois']));
@@ -47,7 +62,6 @@ const findCountyNameAndPopulation = ([shortCountyName, state], populations) => {
 };
 
 const processRegionRows = ([county, state], rows, populations) => {
-
     // calculate daily change
     const dailyChange = rows.map((row, r) => {
         const changeCases = r === 0 ? row[3] : row[3] - rows[r - 1][3];
@@ -186,18 +200,10 @@ const sevenDayAverage = (rows, r) => {
     const regionRows = _.sortBy(stateRows.concat(selectedCountyRows), row => row[0]);
     console.log({regionRows})
 
-    // table.innerHTML = JSON.stringify(stateRows, null, 2);
     const byDay = _.groupBy(regionRows, row => row[0]);
-    // const countiesByDay = _.groupBy(countyRows, row => row[0]);
-    // console.log(statesByDay)
 
-    // const statesByRegion = rows2smoothDailyRateByRegion(stateRows, statePopulations);
-    // const countiesByRegion = rows2smoothDailyRateByRegion(countyRows, countyPopulations);
     const byRegion = rows2smoothDailyRateByRegion(regionRows, populations);
     console.log({ byRegion });
-
-    // const statesSet   = { byRegion: statesByRegion,   byDay: statesByDay   };
-    // const countiesSet = { byRegion: countiesByRegion, byDay: countiesByDay };
 
     const displaySet = {byRegion, byDay};
     console.log({ displaySet });
