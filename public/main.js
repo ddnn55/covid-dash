@@ -1,23 +1,33 @@
 const minDay = "2020-03-01";
 
-const regions = JSON.parse(decodeURIComponent(window.location.search.slice(1)));
-console.log({regions});
+const requestedCounties = JSON.parse(decodeURIComponent(window.location.search.slice(1)));
+console.log({requestedCounties});
 
-(async () => {
+const getCountyData = async county => {
     const result = await fetch(`https://covid-19.datasettes.com/covid.csv?`
     +`sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+order+by+date+desc+limit+101`
-    +`&p0=Champaign`
-    +`&p1=Illinois`
+    +`&p0=${encodeURIComponent(county[0])}`
+    +`&p1=${encodeURIComponent(county[1])}`
     +`&_size=max`);
     const csv = await result.text();
-    console.log(csv)
+    const parsedRows = csv.replace(/\r/g, '').split('\n').map(line => line.split(','));
+    return {
+        columnNames: parsedRows[0],
+        rows: parsedRows.slice(1)
+    };
+};
+
+(async () => {
+    const countiesData = await Promise.all(requestedCounties.map(getCountyData));
+    console.log({countiesData})
 })();
 
 
 const selectedCounties = new Set();
-selectedCounties.add(JSON.stringify(['Los Angeles', 'California']));
-selectedCounties.add(JSON.stringify(['Cook', 'Illinois']));
-selectedCounties.add(JSON.stringify(['Champaign', 'Illinois']));
+requestedCounties.forEach(requestedCounty => selectedCounties.add(JSON.stringify(requestedCounty)));
+// selectedCounties.add(JSON.stringify(['Los Angeles', 'California']));
+// selectedCounties.add(JSON.stringify(['Cook', 'Illinois']));
+// selectedCounties.add(JSON.stringify(['Champaign', 'Illinois']));
 
 const chartContainer = document.querySelector('.chart-container');
 const table = document.querySelector('.table');
