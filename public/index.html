@@ -27,7 +27,6 @@
         .layout {
             display: flex;
             flex-direction: column;
-            /* height: 100vh; */
         }
         .date-range {
             text-align: center;
@@ -35,8 +34,14 @@
         .chart-container {
             flex: 1;
         }
-        .change {
+        .change, .about {
             text-align: center;
+        }
+        .about {
+            margin-bottom: 10px;
+        }
+        .presets {
+            word-wrap: break-word;
         }
     </style>
 
@@ -55,10 +60,11 @@
             <p>
                 Select regions by putting them in the query string, for example:
             </p>
-            <ul>
+            <ul class="presets">
                 <li><a href="/?Cook,Illinois">/?Cook,Illinois</a></li>
                 <li><a href="/?Cook,Illinois;New+York">/?Cook,Illinois;New+York</a></li>
                 <li><a href="/?Cook,Illinois;New+York;Los+Angeles,California;California">/?Cook,Illinois;New+York;Los+Angeles,California;California</a></li>
+                <li><a href="/?Cook,Illinois;New+York;Los+Angeles,California;California;Champaign,Illinois;Illinois">/?Cook,Illinois;New+York;Los+Angeles,California;California;Champaign,Illinois;Illinois</a></li>
             </ul>
         </div>
         <div class="date-range"></div>
