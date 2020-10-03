@@ -143,7 +143,7 @@ const sevenDayAverage = (rows, r) => {
             rowObj.deaths = +rowObj.deaths;
             newRegionRows.push([
                 rowObj.date,
-                rowObj.county,
+                rowObj.county || null,
                 rowObj.state,
                 rowObj.cases,
                 rowObj.deaths
