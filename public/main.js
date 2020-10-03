@@ -3,19 +3,6 @@ const minDay = "2020-03-01";
 const str = decodeURIComponent(window.location.search.slice(1));
 const requestedRegions = str.split(';').map(regionStr => regionStr.split(',').map(regionComponentStr => regionComponentStr.replace(/\+/g, ' ')));
 
-const getStateData = async state => {
-    const result = await fetch(`https://covid-19.datasettes.com/covid.csv?sql=select+rowid%2C+date%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_states+where+date+%3E%3D+%22${minDay}%22+and+state+%3D+%22${encodeURIComponent(state)}%22+order+by+date+asc&_size=max`);
-    let csv = (await result.text()).replace(/\r/g, '');
-    if(csv[csv.length-1] === '\n') {
-        csv = csv.substring(0, csv.length-1);
-    }
-    const parsedRows = csv.split('\n').map(line => line.split(','));
-    return {
-        columnNames: parsedRows[0],
-        rows: parsedRows.slice(1)
-    };
-};
-
 const getDatasetteData = async url => {
     const result = await fetch(url);
     let csv = (await result.text()).replace(/\r/g, '');
@@ -29,11 +16,15 @@ const getDatasetteData = async url => {
     };
 };
 
-const getCountyData = async county => {
+const getStateData = async state => {
+    return await getDatasetteData(`https://covid-19.datasettes.com/covid.csv?sql=select+rowid%2C+date%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_states+where+date+%3E%3D+%22${minDay}%22+and+state+%3D+%22${encodeURIComponent(state)}%22+order+by+date+asc&_size=max`);
+};
+
+const getCountyData = async (county, state) => {
     return await getDatasetteData(`https://covid-19.datasettes.com/covid.csv?`
     +`sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc`
-    +`&p0=${encodeURIComponent(county[0])}`
-    +`&p1=${encodeURIComponent(county[1])}`
+    +`&p0=${encodeURIComponent(county)}`
+    +`&p1=${encodeURIComponent(state)}`
     +`&_size=max`);
 };
 
@@ -135,7 +126,13 @@ const sevenDayAverage = (rows, r) => {
 };
 
 (async () => {
-    const regionsData = await Promise.all(requestedRegions.map(getCountyData));
+    const regionsData = await Promise.all(requestedRegions.map(requestedRegion => {
+        if(requestedRegion.length === 1) {
+            return getStateData(requestedRegion[0]);
+        } else if(requestedRegion.length === 2) {
+            return getCountyData(requestedRegion[0], requestedRegion[1]);
+        }
+    }));
     console.log({regionsData})
     let newRegionRows = [];
     regionsData.forEach(regionData => {
