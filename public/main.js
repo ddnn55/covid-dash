@@ -109,6 +109,15 @@ const rows2smoothDailyRateByRegion = (rows, populations) => {
         });
     });
 
+    // regionalTree is an unecessary legacy format that results in empty regions
+    // if a county's state is not explicitly requested. in the interest of
+    // the developer's time, we just remove those empty regions here.
+    Object.keys(byRegion).forEach(regionKey => {
+        if(Object.keys(byRegion[regionKey]).length === 0) {
+            delete byRegion[regionKey];
+        }
+    });
+
     return byRegion;
 };
 
