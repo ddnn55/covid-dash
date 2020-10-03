@@ -1,6 +1,8 @@
 const minDay = "2020-03-01";
 
-const requestedRegions = JSON.parse(decodeURIComponent(window.location.search.slice(1)));
+const str = decodeURIComponent(window.location.search.slice(1));
+console.log({str})
+const requestedRegions = str.split(';').map(regionStr => regionStr.split(',').map(regionComponentStr => regionComponentStr.replace(/\+/g, ' ')));
 console.log({requestedRegions});
 
 const getCountyData = async county => {
