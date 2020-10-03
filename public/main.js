@@ -167,10 +167,6 @@ const sevenDayAverage = (rows, r) => {
         populations[state].counties[county] = +pop.split(',').join('');
     });
     
-    console.log({populations})
-
-    const stateRows = await loadStateRows("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv");
-    
     const regionRows = newRegionRows;
 
     console.log({regionRows})
