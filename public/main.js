@@ -1,5 +1,12 @@
 const minDay = "2020-03-01";
 
+const layout = document.querySelector('.layout');
+const updateLayout = () => {
+    layout.style.height = innerHeight + 'px';
+};
+updateLayout();
+window.addEventListener('resize', updateLayout);
+
 const requestedRegionsStr = decodeURIComponent(window.location.search.slice(1));
 if (requestedRegionsStr.length === 0) {
   document.querySelector(".instructions").style.display = "block";
