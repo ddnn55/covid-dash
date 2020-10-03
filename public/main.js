@@ -9,7 +9,8 @@ window.addEventListener('resize', updateLayout);
 
 const requestedRegionsStr = decodeURIComponent(window.location.search.slice(1));
 if (requestedRegionsStr.length === 0) {
-  document.querySelector(".instructions").style.display = "block";
+    document.querySelector(".instructions").style.display = "block";
+    document.querySelector(".change").style.display = "none";
 } else {
   const requestedRegions = requestedRegionsStr
     .split(";")

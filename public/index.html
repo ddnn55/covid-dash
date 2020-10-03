@@ -35,6 +35,9 @@
         .chart-container {
             flex: 1;
         }
+        .change {
+            text-align: center;
+        }
     </style>
 
 </head>
@@ -45,11 +48,10 @@
             <div class="title">
                 Covid cases / 100k, 7 Day Average
             </div>
-            <div class="subtitle">Data: <a href="https://covid-19.datasettes.com/covid">datasette/nytimes</a>, <a href="https://en.wikipedia.org/wiki/List_of_states_and_territories_of_the_United_States_by_population#State_rankings">Wikipedia</a>. Code: <a href="https://github.com/gimlids/covid-dash/issues">GitHub</a>.
-            </div>
+            
         </div>
+        
         <div class="instructions" style="display: none">
-            <p>No regions selected.</p>
             <p>
                 Select regions by putting them in the query string, for example:
             </p>
@@ -60,7 +62,11 @@
             </ul>
         </div>
         <div class="date-range"></div>
+        <div class="change">
+            <a href="/">Change Regions</a>
+        </div>
         <div class="chart-container"></div>
+        <div class="about"><a href="/about.html">About</a></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js"></script>
