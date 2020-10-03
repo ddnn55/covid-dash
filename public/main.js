@@ -5,7 +5,7 @@ console.log({requestedRegions});
 
 const getCountyData = async county => {
     const result = await fetch(`https://covid-19.datasettes.com/covid.csv?`
-    +`sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+order+by+date+desc+limit+101`
+    +`sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%222020-03-01%22+order+by+date+desc`
     +`&p0=${encodeURIComponent(county[0])}`
     +`&p1=${encodeURIComponent(county[1])}`
     +`&_size=max`);
@@ -162,7 +162,7 @@ const sevenDayAverage = (rows, r) => {
 
     const regionsData = await Promise.all(requestedRegions.map(getCountyData));
     console.log({regionsData})
-    const newRegionRows = [];
+    let newRegionRows = [];
     regionsData.forEach(regionData => {
         regionData.rows.forEach(regionRow => {
             const rowObj = {};
@@ -181,6 +181,7 @@ const sevenDayAverage = (rows, r) => {
             ]);
         });
     });
+    newRegionRows = _.sortBy(newRegionRows, row => row[0]);
 
 
 
@@ -211,6 +212,9 @@ const sevenDayAverage = (rows, r) => {
     console.log({selectedCountyRows})
 
     const regionRows = _.sortBy(selectedCountyRows, row => row[0]);
+
+
+
     console.log({regionRows})
     console.log({newRegionRows})
 
