@@ -256,6 +256,13 @@ if (requestedRegionsStr.length === 0) {
     Highcharts.chart(chartContainer, {
       xAxis: {
         type: "datetime",
+        labels: {
+            autoRotation: false
+        }
+        // min: new Date('2020-03-01').getTime()
+        // labels: {
+        //     align: 'left'
+        // }
       },
       yAxis: {
         floor: 0,
@@ -290,6 +297,11 @@ if (requestedRegionsStr.length === 0) {
               maxWidth: 800,
             },
             chartOptions: {
+                xAxis: {
+
+            // startOnTick: true,
+            // endOnTick: true,
+                },
               legend: {
                 align: "center",
                 verticalAlign: "bottom",
