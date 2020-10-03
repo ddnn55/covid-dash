@@ -232,8 +232,11 @@ if (requestedRegionsStr.length === 0) {
 
     const byDay = _.groupBy(regionRows, (row) => row[0]);
 
-    const days = Object.keys(byDay);
-    const dateRange = [_.min(days), _.max(days)];
+    const days = Object.keys(byDay).sort();
+    const dateRange = [days[0], days[days.length-1]].map(day => {
+        return `<b>${day}</b>`;
+        // return dateFns.format(dateFns.parseISO(day), 'MMM D y');
+    });
     document.querySelector('.date-range').innerHTML = `${dateRange[0]} to ${dateRange[1]}`;
 
     const byRegion = rows2smoothDailyRateByRegion(regionRows, populations);
