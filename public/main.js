@@ -19,7 +19,7 @@ if (requestedRegionsStr.length === 0) {
         .map((regionComponentStr) => regionComponentStr.replace(/\+/g, " "))
     );
 
-  const getDatasetteData = async (url) => {
+  const getDatasetteCsv = async (url) => {
     const result = await fetch(url);
     let csv = (await result.text()).replace(/\r/g, "");
     if (csv[csv.length - 1] === "\n") {
@@ -32,8 +32,24 @@ if (requestedRegionsStr.length === 0) {
     };
   };
 
+  const getRegionsMetadata = async () => {
+    let counties = [];
+    let offset = 0;
+    let done = false;
+    do {
+      const result = await fetch(`https://covid-19.datasettes.com/covid.json?sql=select+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths%2C+population%2C+deaths_per_million%2C+cases_per_million+from+latest_ny_times_counties_with_populations+desc+limit+99999999999+offset+${offset}`);
+      const json = await result.json();
+      counties = counties.concat(json.rows);
+      offset += json.rows.length;
+      done = !json.truncated;
+      console.log(json)
+    } while(!done);
+    console.log(counties)
+    return;
+  };
+
   const getStateData = async (state) => {
-    return await getDatasetteData(
+    return await getDatasetteCsv(
       `https://covid-19.datasettes.com/covid.csv?sql=select+rowid%2C+date%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_states+where+date+%3E%3D+%22${minDay}%22+and+state+%3D+%22${encodeURIComponent(
         state
       )}%22+order+by+date+asc&_size=max`
@@ -41,7 +57,7 @@ if (requestedRegionsStr.length === 0) {
   };
 
   const getCountyData = async (county, state) => {
-    return await getDatasetteData(
+    return await getDatasetteCsv(
       `https://covid-19.datasettes.com/covid.csv?` +
         `sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc` +
         `&p0=${encodeURIComponent(county)}` +
@@ -185,16 +201,18 @@ if (requestedRegionsStr.length === 0) {
   });
 
   (async () => {
-    const regionsData = await Promise.all(
-      requestedRegions.map((requestedRegion) => {
-        if (requestedRegion.length === 1) {
-          return getStateData(requestedRegion[0]);
-        } else if (requestedRegion.length === 2) {
-          return getCountyData(requestedRegion[0], requestedRegion[1]);
-        }
-      })
+    const regionsDataRequests = requestedRegions.map((requestedRegion) => {
+      if (requestedRegion.length === 1) {
+        return getStateData(requestedRegion[0]);
+      } else if (requestedRegion.length === 2) {
+        return getCountyData(requestedRegion[0], requestedRegion[1]);
+      }
+    });
+    const regionsMetadataRequest = getRegionsMetadata();
+    const [regionsMetadata, ...regionsData] = await Promise.all(
+      [regionsMetadataRequest].concat(regionsDataRequests)
     );
-    console.log({ regionsData });
+    // console.log({ regionsData });
     let newRegionRows = [];
     regionsData.forEach((regionData) => {
       regionData.rows.forEach((regionRow) => {
@@ -231,14 +249,14 @@ if (requestedRegionsStr.length === 0) {
       "us-counties-population-estimate-2019.tsv",
       "\t"
     );
-    console.log({ countyPopulationRows });
+    // console.log({ countyPopulationRows });
     countyPopulationRows.forEach(([county, state, pop]) => {
       populations[state].counties[county] = +pop.split(",").join("");
     });
 
     const regionRows = newRegionRows;
 
-    console.log({ regionRows });
+    // console.log({ regionRows });
 
     const byDay = _.groupBy(regionRows, (row) => row[0]);
 
@@ -252,14 +270,14 @@ if (requestedRegionsStr.length === 0) {
     ).innerHTML = `${dateRange[0]} to ${dateRange[1]}`;
 
     const byRegion = rows2smoothDailyRateByRegion(regionRows, populations);
-    console.log({ byRegion });
+    // console.log({ byRegion });
 
     const displaySet = { byRegion, byDay };
-    console.log({ displaySet });
+    // console.log({ displaySet });
 
     const highchartsSeries = set2highcharts(displaySet);
     // debugger;
-    console.log({ highchartsSeries });
+    // console.log({ highchartsSeries });
 
     Highcharts.chart(chartContainer, {
       xAxis: {
