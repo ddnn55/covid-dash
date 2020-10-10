@@ -44,8 +44,11 @@ if (requestedRegionsStr.length === 0) {
       done = !json.truncated;
       console.log(json)
     } while(!done);
-    console.log(counties)
-    return counties;
+    return counties.map(([date, county, state, fips, cases, deaths, population]) => ({
+      county,
+      state,
+      pop_estimate_2019: population
+    }));
   };
 
   const getStatesMetadata = async () => {
