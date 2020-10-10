@@ -32,7 +32,7 @@ if (requestedRegionsStr.length === 0) {
     };
   };
 
-  const getRegionsMetadata = async () => {
+  const getCountiesMetadata = async () => {
     let counties = [];
     let offset = 0;
     let done = false;
@@ -45,7 +45,21 @@ if (requestedRegionsStr.length === 0) {
       console.log(json)
     } while(!done);
     console.log(counties)
-    return;
+    return counties;
+  };
+
+  const getStatesMetadata = async () => {
+    const result = await fetch(`https://covid-19.datasettes.com/covid.json?sql=select+rowid%2C+region_id%2C+division_id%2C+state_id%2C+state_name%2C+pop_estimate_2019+from+us_census_state_populations_2019`);
+    const json = await result.json();
+    return json.rows;
+  };
+
+  const getRegionsMetadata = async () => {
+    const [countiesMetadata, statesMetadata] = await Promise.all([
+      getCountiesMetadata(),
+      getStatesMetadata()
+    ]);
+    return countiesMetadata.concat(statesMetadata);
   };
 
   const getStateData = async (state) => {
@@ -212,7 +226,7 @@ if (requestedRegionsStr.length === 0) {
     const [regionsMetadata, ...regionsData] = await Promise.all(
       [regionsMetadataRequest].concat(regionsDataRequests)
     );
-    // console.log({ regionsData });
+    console.log({ regionsMetadata });
     let newRegionRows = [];
     regionsData.forEach((regionData) => {
       regionData.rows.forEach((regionRow) => {
