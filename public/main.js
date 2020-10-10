@@ -47,6 +47,7 @@ if (requestedRegionsStr.length === 0) {
     return counties.map(([date, county, state, fips, cases, deaths, population]) => ({
       county,
       state,
+      formatted: `${county}, ${state}`,
       pop_estimate_2019: population
     }));
   };
@@ -56,6 +57,7 @@ if (requestedRegionsStr.length === 0) {
     const json = await result.json();
     return json.rows.map(([state_name, pop_estimate_2019]) => ({
       state: state_name,
+      formatted: state_name,
       pop_estimate_2019
     }));
   };
