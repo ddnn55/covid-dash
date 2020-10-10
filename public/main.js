@@ -225,17 +225,6 @@ if (requestedRegionsStr.length === 0) {
     );
     console.log({ regionsMetadata });
 
-    const tagifyInput = document.querySelector('textarea[name=tags2]');
-    const tagify = new Tagify(tagifyInput, {
-        enforceWhitelist : true,
-        delimiters       : null,
-        whitelist        : regionsMetadata.map(regionMetadata => regionMetadata.formatted),
-        callbacks        : {
-            add    : console.log,  // callback when adding a tag
-            remove : console.log   // callback when removing a tag
-        }
-    });
-
     let newRegionRows = [];
     regionsData.forEach((regionData) => {
       regionData.rows.forEach((regionRow) => {
@@ -302,7 +291,7 @@ if (requestedRegionsStr.length === 0) {
     // debugger;
     // console.log({ highchartsSeries });
 
-    Highcharts.chart(chartContainer, {
+    const chart = Highcharts.chart(chartContainer, {
       xAxis: {
         type: "datetime",
         labels: {
@@ -370,5 +359,17 @@ if (requestedRegionsStr.length === 0) {
         ],
       },
     });
+
+    const tagifyInput = document.querySelector('textarea[name=tags2]');
+    const tagify = new Tagify(tagifyInput, {
+        enforceWhitelist : true,
+        delimiters       : null,
+        whitelist        : regionsMetadata.map(regionMetadata => regionMetadata.formatted),
+        callbacks        : {
+            add    : () => chart.reflow(),  // callback when adding a tag
+            remove : () => chart.reflow()   // callback when removing a tag
+        }
+    });
+
   })();
 }
