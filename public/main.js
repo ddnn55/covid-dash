@@ -47,7 +47,7 @@ if (requestedRegionsStr.length === 0) {
     return counties.map(([date, county, state, fips, cases, deaths, population]) => ({
       county,
       state,
-      formatted: `${county}, ${state}`,
+      value: `${county}, ${state}`,
       pop_estimate_2019: population
     }));
   };
@@ -57,7 +57,7 @@ if (requestedRegionsStr.length === 0) {
     const json = await result.json();
     return json.rows.map(([state_name, pop_estimate_2019]) => ({
       state: state_name,
-      formatted: state_name,
+      value: state_name,
       pop_estimate_2019
     }));
   };
@@ -360,7 +360,10 @@ if (requestedRegionsStr.length === 0) {
       },
     });
 
-    const selectedRegionsChanged = () => chart.reflow();
+    const selectedRegionsChanged = (tagifyEvent) => {
+      console.log(tagifyEvent.detail.data);
+      chart.reflow();
+    };
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
     tagifyInputContainer.style.display = 'block';
     const tagifyInput = tagifyInputContainer.querySelector('textarea');
@@ -368,7 +371,12 @@ if (requestedRegionsStr.length === 0) {
     const tagify = new Tagify(tagifyInput, {
         enforceWhitelist : true,
         delimiters       : null,
-        whitelist        : regionsMetadata.map(regionMetadata => regionMetadata.formatted),
+        whitelist        : regionsMetadata,
+
+        templates: {
+          // tag: region => region.formatted,
+          // dropdownItem: region => region.formatted
+        },
         callbacks        : {
             add    : selectedRegionsChanged,  // callback when adding a tag
             remove : selectedRegionsChanged   // callback when removing a tag
