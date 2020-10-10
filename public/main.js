@@ -49,9 +49,12 @@ if (requestedRegionsStr.length === 0) {
   };
 
   const getStatesMetadata = async () => {
-    const result = await fetch(`https://covid-19.datasettes.com/covid.json?sql=select+rowid%2C+region_id%2C+division_id%2C+state_id%2C+state_name%2C+pop_estimate_2019+from+us_census_state_populations_2019`);
+    const result = await fetch(`https://covid-19.datasettes.com/covid.json?sql=select+state_name%2C+pop_estimate_2019+from+us_census_state_populations_2019+where+state_id+!%3D+0`);
     const json = await result.json();
-    return json.rows;
+    return json.rows.map(([state_name, pop_estimate_2019]) => ({
+      state: state_name,
+      pop_estimate_2019
+    }));
   };
 
   const getRegionsMetadata = async () => {
