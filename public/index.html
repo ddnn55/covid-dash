@@ -43,6 +43,9 @@
         .presets {
             word-wrap: break-word;
         }
+        .regions-selector-container {
+            display: none;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tagify/3.19.4/tagify.min.css"/>
 
@@ -68,8 +71,8 @@
                 <li><a href="/?Cook,Illinois;New+York;Los+Angeles,California;California;Champaign,Illinois;Illinois">/?Cook,Illinois;New+York;Los+Angeles,California;California;Champaign,Illinois;Illinois</a></li>
             </ul>
         </div>
-        <div>
-            <textarea name='tags2' placeholder='Search states and counties...'>
+        <div class="regions-selector-container">
+            <textarea class="regions-selector" name='tags2' placeholder='Search states and counties...'>
                 []
             </textarea>
         </div>

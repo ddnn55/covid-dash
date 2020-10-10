@@ -360,14 +360,18 @@ if (requestedRegionsStr.length === 0) {
       },
     });
 
-    const tagifyInput = document.querySelector('textarea[name=tags2]');
+    const selectedRegionsChanged = () => chart.reflow();
+    const tagifyInputContainer = document.querySelector('.regions-selector-container');
+    tagifyInputContainer.style.display = 'block';
+    const tagifyInput = tagifyInputContainer.querySelector('textarea');
+    tagifyInput.style.display = 'block';
     const tagify = new Tagify(tagifyInput, {
         enforceWhitelist : true,
         delimiters       : null,
         whitelist        : regionsMetadata.map(regionMetadata => regionMetadata.formatted),
         callbacks        : {
-            add    : () => chart.reflow(),  // callback when adding a tag
-            remove : () => chart.reflow()   // callback when removing a tag
+            add    : selectedRegionsChanged,  // callback when adding a tag
+            remove : selectedRegionsChanged   // callback when removing a tag
         }
     });
 
