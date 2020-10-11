@@ -245,7 +245,6 @@ if (requestedRegionsStr.length === 0) {
         value: `${county}, ${state}`,
         county,
         state,
-        population
       });
     });
     console.log({wikipediaRegions})
@@ -395,12 +394,19 @@ if (requestedRegionsStr.length === 0) {
       regions.map(region => ('county' in region ? `${region.county},${region.state}` : region.state).replace(/ /g, '+')).join(';');
 
     let tagify;
-    const selectedRegionsChanged = (tagifyEvent) => {
-      const {type, detail: { data: region }} = tagifyEvent;
-      // console.log(tagifyEvent)
-      console.log(type, region);
+    const changedRegions = () => {
       history.replaceState({}, '', `/?${regionsToUriString(tagify.value)}`)
       chart.reflow();
+    };
+    const addedRegion = (tagifyEvent) => {
+      const {type, detail: { data: region }} = tagifyEvent;
+      console.log('added', region);
+      changedRegions();
+    };
+    const removedRegion = (tagifyEvent) => {
+      const {type, detail: { data: region }} = tagifyEvent;
+      console.log('removed', region);
+      changedRegions();
     };
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
     tagifyInputContainer.style.display = 'block';
@@ -418,8 +424,8 @@ if (requestedRegionsStr.length === 0) {
           // dropdownItem: region => region.formatted
         },
         callbacks        : {
-            add    : selectedRegionsChanged,  // callback when adding a tag
-            remove : selectedRegionsChanged   // callback when removing a tag
+            add    : addedRegion,  // callback when adding a tag
+            remove : removedRegion   // callback when removing a tag
         }
     });
     chart.reflow();
