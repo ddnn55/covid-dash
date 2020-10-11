@@ -103,8 +103,8 @@ if (requestedRegionsStr.length === 0) {
     [shortCountyName, state],
     populations
   ) => {
-    let longCountyName = `${shortCountyName} County`;
-    return [longCountyName, populations[state].counties[longCountyName]];
+    // let longCountyName = `${shortCountyName} County`;
+    return [shortCountyName, populations[state].counties[shortCountyName]];
   };
 
   const processRegionRows = ([county, state], rows, populations) => {
@@ -212,6 +212,47 @@ if (requestedRegionsStr.length === 0) {
   };
 
   (async () => {
+
+    const wikipediaRegions = [];
+
+    const statePopulationRows = await loadDsv(
+      "us-states-population-april-1-2020.tsv",
+      "\t"
+    );
+    let populations = {};
+    statePopulationRows.forEach(([state, pop]) => {
+      const population = +pop.split(",").join("");
+      populations[state] = {
+        population: population,
+        counties: {},
+      };
+      wikipediaRegions.push({
+        value: state,
+        state,
+        population
+      });
+    });
+
+    const countyPopulationRows = await loadDsv(
+      "us-counties-population-estimate-2019.tsv",
+      "\t"
+    );
+    // console.log({ countyPopulationRows });
+    countyPopulationRows.forEach(([county, state, pop]) => {
+      const population = +pop.split(",").join("");
+      populations[state].counties[county] = population;
+      wikipediaRegions.push({
+        value: `${county}, ${state}`,
+        county,
+        state,
+        population
+      });
+    });
+    console.log({wikipediaRegions})
+    
+    
+
+
     const regionsDataRequests = requestedRegions.map((requestedRegion) => {
       if (requestedRegion.length === 1) {
         return getStateData(requestedRegion[0]);
@@ -244,27 +285,6 @@ if (requestedRegionsStr.length === 0) {
       });
     });
     newRegionRows = _.sortBy(newRegionRows, (row) => row[0]);
-
-    const statePopulationRows = await loadDsv(
-      "us-states-population-april-1-2020.tsv",
-      "\t"
-    );
-    let populations = {};
-    statePopulationRows.forEach(([state, pop]) => {
-      populations[state] = {
-        population: +pop.split(",").join(""),
-        counties: {},
-      };
-    });
-
-    const countyPopulationRows = await loadDsv(
-      "us-counties-population-estimate-2019.tsv",
-      "\t"
-    );
-    // console.log({ countyPopulationRows });
-    countyPopulationRows.forEach(([county, state, pop]) => {
-      populations[state].counties[county] = +pop.split(",").join("");
-    });
 
     const regionRows = newRegionRows;
 
@@ -378,7 +398,8 @@ if (requestedRegionsStr.length === 0) {
     tagify = new Tagify(tagifyInput, {
         enforceWhitelist : true,
         delimiters       : null,
-        whitelist        : regionsMetadata,
+        // whitelist        : regionsMetadata, // missing NYC counties at time of writing
+        whitelist        : wikipediaRegions,
 
         templates: {
           // tag: region => region.formatted,
