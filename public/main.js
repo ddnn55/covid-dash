@@ -360,17 +360,22 @@ if (requestedRegionsStr.length === 0) {
       },
     });
 
+    const regionsToUriString = regions => 
+      regions.map(region => ('county' in region ? `${region.county},${region.state}` : region.state).replace(/ /g, '+')).join(';');
+
+    let tagify;
     const selectedRegionsChanged = (tagifyEvent) => {
       const {type, detail: { data: region }} = tagifyEvent;
       // console.log(tagifyEvent)
       console.log(type, region);
+      history.replaceState({}, '', `/?${regionsToUriString(tagify.value)}`)
       chart.reflow();
     };
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
     tagifyInputContainer.style.display = 'block';
     const tagifyInput = tagifyInputContainer.querySelector('textarea');
     tagifyInput.style.display = 'block';
-    const tagify = new Tagify(tagifyInput, {
+    tagify = new Tagify(tagifyInput, {
         enforceWhitelist : true,
         delimiters       : null,
         whitelist        : regionsMetadata,
@@ -384,6 +389,7 @@ if (requestedRegionsStr.length === 0) {
             remove : selectedRegionsChanged   // callback when removing a tag
         }
     });
+    chart.reflow();
 
   })();
 }
