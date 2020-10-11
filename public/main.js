@@ -18,6 +18,7 @@ if (requestedRegionsStr.length === 0) {
         .split(",")
         .map((regionComponentStr) => regionComponentStr.replace(/\+/g, " "))
     );
+  console.log({requestedRegions})
 
   const getDatasetteCsv = async (url) => {
     const result = await fetch(url);
@@ -229,7 +230,6 @@ if (requestedRegionsStr.length === 0) {
       wikipediaRegions.push({
         value: state,
         state,
-        population
       });
     });
 
@@ -252,11 +252,22 @@ if (requestedRegionsStr.length === 0) {
     
     
 
-
+    const requestedRegionsValue = [];
     const regionsDataRequests = requestedRegions.map((requestedRegion) => {
       if (requestedRegion.length === 1) {
+        const [state] = requestedRegion;
+        requestedRegionsValue.push({
+          value: requestedRegion[0],
+          state: requestedRegion[0],
+        });
         return getStateData(requestedRegion[0]);
       } else if (requestedRegion.length === 2) {
+        const [county, state] = requestedRegion;
+        requestedRegionsValue.push({
+          value: `${county}, ${state}`,
+          county,
+          state,
+        });
         return getCountyData(requestedRegion[0], requestedRegion[1]);
       }
     });
@@ -394,6 +405,7 @@ if (requestedRegionsStr.length === 0) {
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
     tagifyInputContainer.style.display = 'block';
     const tagifyInput = tagifyInputContainer.querySelector('textarea');
+    tagifyInput.value = JSON.stringify(requestedRegionsValue);
     tagifyInput.style.display = 'block';
     tagify = new Tagify(tagifyInput, {
         enforceWhitelist : true,
