@@ -361,7 +361,9 @@ if (requestedRegionsStr.length === 0) {
     });
 
     const selectedRegionsChanged = (tagifyEvent) => {
-      console.log(tagifyEvent.detail.data);
+      const {type, detail: { data: region }} = tagifyEvent;
+      // console.log(tagifyEvent)
+      console.log(type, region);
       chart.reflow();
     };
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
