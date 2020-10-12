@@ -389,6 +389,11 @@ if (requestedRegionsStr.length === 0) {
         ],
       },
     });
+    window.chart = chart;
+    const serieses = {};
+    chart.series.forEach(series => {
+      serieses[series.name] = series;
+    });
 
     const regionsToUriString = regions => 
       regions.map(region => ('county' in region ? `${region.county},${region.state}` : region.state).replace(/ /g, '+')).join(';');
@@ -406,6 +411,8 @@ if (requestedRegionsStr.length === 0) {
     const removedRegion = (tagifyEvent) => {
       const {type, detail: { data: region }} = tagifyEvent;
       console.log('removed', region);
+      serieses[region.value].remove();
+      delete serieses[region.value];
       changedRegions();
     };
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
