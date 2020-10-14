@@ -398,7 +398,21 @@ if (requestedRegionsStr.length === 0) {
     const regionsToUriString = regions => 
       regions.map(region => ('county' in region ? `${region.county},${region.state}` : region.state).replace(/ /g, '+')).join(';');
 
+    const RegionLoader = region => {
+      /*if(region.place) {
+        // LA times place data
+        return LATimesPlaceSeriesLoader(region);
+      }
+      else*/ if(region.county) {
+        return CountySeriesLoader(region);
+      }
+      else {
+        return StateSeriesLoader(region);
+      }
+    };
+
     let tagify;
+    const loading = {};
     const changedRegions = () => {
       history.replaceState({}, '', `/?${regionsToUriString(tagify.value)}`)
       chart.reflow();
@@ -406,13 +420,19 @@ if (requestedRegionsStr.length === 0) {
     const addedRegion = (tagifyEvent) => {
       const {type, detail: { data: region }} = tagifyEvent;
       console.log('added', region);
+      loading[region.value] = RegionLoader(region);
       changedRegions();
     };
     const removedRegion = (tagifyEvent) => {
       const {type, detail: { data: region }} = tagifyEvent;
       console.log('removed', region);
-      serieses[region.value].remove();
-      delete serieses[region.value];
+      if(loading[region.value]) {
+        loading[region.value].cancel();
+      }
+      else {
+        serieses[region.value].remove();
+        delete serieses[region.value];
+      }
       changedRegions();
     };
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
