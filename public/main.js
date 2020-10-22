@@ -298,7 +298,7 @@ if (requestedRegionsStr.length === 0) {
 
     const regionRows = newRegionRows;
 
-    // console.log({ regionRows });
+    console.log({ regionRows });
 
     const byDay = _.groupBy(regionRows, (row) => row[0]);
 
@@ -317,6 +317,7 @@ if (requestedRegionsStr.length === 0) {
     const displaySet = { byRegion, byDay };
     // console.log({ displaySet });
 
+    // debugger;
     const highchartsSeries = set2highcharts(displaySet);
     // debugger;
     console.log({ highchartsSeries });
@@ -469,7 +470,16 @@ if (requestedRegionsStr.length === 0) {
           row[c]
         ]))
       ));
-      console.log('formatAndAdd', {entries});
+      const normalizedRows = entries.map(({date, county, state, cases, deaths}) => ([
+        date,
+        county || null,
+        state,
+        +cases,
+        +deaths
+      ]));
+      const sortedNormalizedRows = _.sortBy(normalizedRows, row => row[0]);
+      console.log('formatAndAdd', {sortedNormalizedRows});
+
     };
 
     const RegionLoader = region => region.county
