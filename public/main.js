@@ -481,7 +481,8 @@ if (requestedRegionsStr.length === 0) {
       const byRegion = rows2smoothDailyRateByRegion(sortedNormalizedRows, populations);
       const byDay = _.groupBy(sortedNormalizedRows, (row) => row[0]);
       const highchartsSerieses = set2highcharts({byRegion, byDay});
-      chart.addSeries(highchartsSerieses[0]);
+      const actualHighchartsSeries = chart.addSeries(highchartsSerieses[0]);
+      serieses[actualHighchartsSeries.name] = actualHighchartsSeries;
       console.log('formatAndAdd', {highchartsSerieses});
 
     };
@@ -503,15 +504,15 @@ if (requestedRegionsStr.length === 0) {
       changedRegions();
     };
     const removedRegion = (tagifyEvent) => {
+      debugger;
       const { type, detail: { data: region } } = tagifyEvent;
       console.log('removed', region);
       if (loading[region.value]) {
         loading[region.value].cancel();
       }
-      else {
-        serieses[region.value].remove();
-        delete serieses[region.value];
-      }
+
+      serieses[region.value] && serieses[region.value].remove();
+      delete serieses[region.value];
       changedRegions();
     };
     const tagifyInputContainer = document.querySelector('.regions-selector-container');
