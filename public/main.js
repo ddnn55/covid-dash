@@ -319,7 +319,7 @@ if (requestedRegionsStr.length === 0) {
 
     const highchartsSeries = set2highcharts(displaySet);
     // debugger;
-    // console.log({ highchartsSeries });
+    console.log({ highchartsSeries });
 
     const chart = Highcharts.chart(chartContainer, {
       xAxis: {
@@ -425,7 +425,8 @@ if (requestedRegionsStr.length === 0) {
       }
     };
 
-    const CountySeriesLoader = region => {
+    const CountySeriesLoader = (region, onComplete) => {
+      let canceled = false;
       const csvLoader = DatasetteCsvLoader(
         `https://covid-19.datasettes.com/covid.csv?` +
         `sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc` +
@@ -433,45 +434,47 @@ if (requestedRegionsStr.length === 0) {
         `&p1=${encodeURIComponent(region.state)}` +
         `&_size=max`,
         ({columnNames, rows}) => {
-          console.log('loaded county rows', columnNames, rows);
+          if(canceled) {
+            return;
+          }
+          onComplete({columnNames, rows});
         }
       );
-      // @TODO transform into standardized rows
-      // @TODO pass through standard rows to highcharts process
-      // @TODO call onComplete
       return {
-        cancel: () => csvLoader.cancel()
+        cancel: () => {canceled = true; csvLoader.cancel()}
       };
     };
-    const StateSeriesLoader = region => {
+    const StateSeriesLoader = (region, onComplete) => {
+      let canceled = false;
       const csvLoader = DatasetteCsvLoader(
         `https://covid-19.datasettes.com/covid.csv?sql=select+rowid%2C+date%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_states+where+date+%3E%3D+%22${minDay}%22+and+state+%3D+%22${encodeURIComponent(
           region.state
         )}%22+order+by+date+asc&_size=max`,
         ({columnNames, rows}) => {
-          console.log('loaded state rows', columnNames, rows);
+          if(canceled) {
+            return;
+          }
+          onComplete({columnNames, rows});
         }
       );
-      // @TODO transform into standardized rows
-      // @TODO pass through standard rows to highcharts process
-      // @TODO call onComplete
       return {
-        cancel: () => csvLoader.cancel()
+        cancel: () => {canceled = true; csvLoader.cancel()}
       };
     };
 
-    const RegionLoader = region => {
-      /*if(region.place) {
-        // LA times place data
-        return LATimesPlaceSeriesLoader(region);
-      }
-      else*/ if (region.county) {
-        return CountySeriesLoader(region);
-      }
-      else {
-        return StateSeriesLoader(region);
-      }
+    const formatAndAdd = ({columnNames, rows}) => {
+      const entries = rows.map(row => Object.fromEntries(
+        columnNames.map((columnName, c) => ([
+          columnName,
+          row[c]
+        ]))
+      ));
+      console.log('formatAndAdd', {entries});
     };
+
+    const RegionLoader = region => region.county
+        ? CountySeriesLoader(region, formatAndAdd)
+        : StateSeriesLoader(region, formatAndAdd);
 
     let tagify;
     const loading = {};
