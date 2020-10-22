@@ -18,7 +18,7 @@ if (requestedRegionsStr.length === 0) {
         .split(",")
         .map((regionComponentStr) => regionComponentStr.replace(/\+/g, " "))
     );
-  console.log({requestedRegions})
+  console.log({ requestedRegions })
 
   const getDatasetteCsv = async (url) => {
     const result = await fetch(url);
@@ -44,7 +44,7 @@ if (requestedRegionsStr.length === 0) {
       offset += json.rows.length;
       done = !json.truncated;
       console.log(json)
-    } while(!done);
+    } while (!done);
     return counties.map(([date, county, state, fips, cases, deaths, population]) => ({
       county,
       state,
@@ -82,10 +82,10 @@ if (requestedRegionsStr.length === 0) {
   const getCountyData = async (county, state) => {
     return await getDatasetteCsv(
       `https://covid-19.datasettes.com/covid.csv?` +
-        `sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc` +
-        `&p0=${encodeURIComponent(county)}` +
-        `&p1=${encodeURIComponent(state)}` +
-        `&_size=max`
+      `sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc` +
+      `&p0=${encodeURIComponent(county)}` +
+      `&p1=${encodeURIComponent(state)}` +
+      `&_size=max`
     );
   };
 
@@ -247,9 +247,9 @@ if (requestedRegionsStr.length === 0) {
         state,
       });
     });
-    console.log({wikipediaRegions})
-    
-    
+    console.log({ wikipediaRegions })
+
+
 
     const requestedRegionsValue = [];
     const regionsDataRequests = requestedRegions.map((requestedRegion) => {
@@ -395,44 +395,71 @@ if (requestedRegionsStr.length === 0) {
       serieses[series.name] = series;
     });
 
-    const regionsToUriString = regions => 
+    const regionsToUriString = regions =>
       regions.map(region => ('county' in region ? `${region.county},${region.state}` : region.state).replace(/ /g, '+')).join(';');
 
-      const CountySeriesLoader = region => {
-        const csvLoader = DatasetteCsvLoader(
-          `https://covid-19.datasettes.com/covid.csv?` +
-          `sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc` +
-          `&p0=${encodeURIComponent(region.county)}` +
-          `&p1=${encodeURIComponent(region.state)}` +
-          `&_size=max`
-        );
-        // @TODO transform into standardized rows
-        // @TODO pass through standard rows to highcharts process
-        // @TODO call onComplete
-        return {
-          cancel: () => csvLoader.cancel()
-        };
+    const DatasetteCsvLoader = url => {
+      const controller = new AbortController();
+      const { signal } = controller;
+
+      fetch(url, { signal }).then(response => {
+
+        (async () => {
+          let csv = (await response.text()).replace(/\r/g, "");
+          if (csv[csv.length - 1] === "\n") {
+            csv = csv.substring(0, csv.length - 1);
+          }
+          const parsedRows = csv.split("\n").map((line) => line.split(","));
+          onComplete({
+            columnNames: parsedRows[0],
+            rows: parsedRows.slice(1),
+          });
+        })();
+
+      }).catch(e => {
+        console.warn(`Fetch 1 error: ${e.message}`);
+      });
+
+      return {
+        cancel: () => controller.abort()
+      }
+    };
+
+    const CountySeriesLoader = region => {
+      const csvLoader = DatasetteCsvLoader(
+        `https://covid-19.datasettes.com/covid.csv?` +
+        `sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc` +
+        `&p0=${encodeURIComponent(region.county)}` +
+        `&p1=${encodeURIComponent(region.state)}` +
+        `&_size=max`
+      );
+      // @TODO transform into standardized rows
+      // @TODO pass through standard rows to highcharts process
+      // @TODO call onComplete
+      return {
+        cancel: () => csvLoader.cancel()
       };
-      const StateSeriesLoader = region => {
-        const csvLoader = DatasetteCsvLoader(
-          `https://covid-19.datasettes.com/covid.csv?sql=select+rowid%2C+date%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_states+where+date+%3E%3D+%22${minDay}%22+and+state+%3D+%22${encodeURIComponent(
-        region.state
-      )}%22+order+by+date+asc&_size=max`
-        );
-        // @TODO transform into standardized rows
-        // @TODO pass through standard rows to highcharts process
-        // @TODO call onComplete
-        return {
-          cancel: () => csvLoader.cancel()
-        };
+    };
+    const StateSeriesLoader = region => {
+      const csvLoader = DatasetteCsvLoader(
+        `https://covid-19.datasettes.com/covid.csv?sql=select+rowid%2C+date%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_states+where+date+%3E%3D+%22${minDay}%22+and+state+%3D+%22${encodeURIComponent(
+          region.state
+        )}%22+order+by+date+asc&_size=max`
+      );
+      // @TODO transform into standardized rows
+      // @TODO pass through standard rows to highcharts process
+      // @TODO call onComplete
+      return {
+        cancel: () => csvLoader.cancel()
       };
+    };
 
     const RegionLoader = region => {
       /*if(region.place) {
         // LA times place data
         return LATimesPlaceSeriesLoader(region);
       }
-      else*/ if(region.county) {
+      else*/ if (region.county) {
         return CountySeriesLoader(region);
       }
       else {
@@ -447,15 +474,15 @@ if (requestedRegionsStr.length === 0) {
       chart.reflow();
     };
     const addedRegion = (tagifyEvent) => {
-      const {type, detail: { data: region }} = tagifyEvent;
+      const { type, detail: { data: region } } = tagifyEvent;
       console.log('added', region);
       loading[region.value] = RegionLoader(region);
       changedRegions();
     };
     const removedRegion = (tagifyEvent) => {
-      const {type, detail: { data: region }} = tagifyEvent;
+      const { type, detail: { data: region } } = tagifyEvent;
       console.log('removed', region);
-      if(loading[region.value]) {
+      if (loading[region.value]) {
         loading[region.value].cancel();
       }
       else {
@@ -470,19 +497,19 @@ if (requestedRegionsStr.length === 0) {
     tagifyInput.value = JSON.stringify(requestedRegionsValue);
     tagifyInput.style.display = 'block';
     tagify = new Tagify(tagifyInput, {
-        enforceWhitelist : true,
-        delimiters       : null,
-        // whitelist        : regionsMetadata, // missing NYC counties at time of writing
-        whitelist        : wikipediaRegions,
+      enforceWhitelist: true,
+      delimiters: null,
+      // whitelist        : regionsMetadata, // missing NYC counties at time of writing
+      whitelist: wikipediaRegions,
 
-        templates: {
-          // tag: region => region.formatted,
-          // dropdownItem: region => region.formatted
-        },
-        callbacks        : {
-            add    : addedRegion,  // callback when adding a tag
-            remove : removedRegion   // callback when removing a tag
-        }
+      templates: {
+        // tag: region => region.formatted,
+        // dropdownItem: region => region.formatted
+      },
+      callbacks: {
+        add: addedRegion,  // callback when adding a tag
+        remove: removedRegion   // callback when removing a tag
+      }
     });
     chart.reflow();
 
