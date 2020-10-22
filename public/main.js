@@ -487,12 +487,19 @@ if (requestedRegionsStr.length === 0) {
 
     };
 
-    const RegionLoader = region => region.county
-        ? CountySeriesLoader(region, formatAndAdd)
-        : StateSeriesLoader(region, formatAndAdd);
+    const RegionLoader = (region, onComplete) => region.county
+        ? CountySeriesLoader(region, (...all) => {
+          formatAndAdd(...all);
+          onComplete();
+        })
+        : StateSeriesLoader(region, (...all) => {
+          formatAndAdd(...all);
+          onComplete();
+        });
 
     let tagify;
     const loading = {};
+    window.loading = loading;
     const changedRegions = () => {
       history.replaceState({}, '', `/?${regionsToUriString(tagify.value)}`)
       chart.reflow();
@@ -500,11 +507,11 @@ if (requestedRegionsStr.length === 0) {
     const addedRegion = (tagifyEvent) => {
       const { type, detail: { data: region } } = tagifyEvent;
       console.log('added', region);
-      loading[region.value] = RegionLoader(region);
+      const name = region.value;
+      loading[name] = RegionLoader(region, () => delete loading[name]);
       changedRegions();
     };
     const removedRegion = (tagifyEvent) => {
-      debugger;
       const { type, detail: { data: region } } = tagifyEvent;
       console.log('removed', region);
       if (loading[region.value]) {
