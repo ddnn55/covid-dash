@@ -478,7 +478,10 @@ if (requestedRegionsStr.length === 0) {
         +deaths
       ]));
       const sortedNormalizedRows = _.sortBy(normalizedRows, row => row[0]);
-      console.log('formatAndAdd', {sortedNormalizedRows});
+      const byRegion = rows2smoothDailyRateByRegion(sortedNormalizedRows, populations);
+      const byDay = _.groupBy(sortedNormalizedRows, (row) => row[0]);
+      const highchartsSerieses = set2highcharts({byRegion, byDay});
+      console.log('formatAndAdd', {highchartsSerieses});
 
     };
 
