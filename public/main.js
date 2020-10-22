@@ -481,6 +481,7 @@ if (requestedRegionsStr.length === 0) {
       const byRegion = rows2smoothDailyRateByRegion(sortedNormalizedRows, populations);
       const byDay = _.groupBy(sortedNormalizedRows, (row) => row[0]);
       const highchartsSerieses = set2highcharts({byRegion, byDay});
+      chart.addSeries(highchartsSerieses[0]);
       console.log('formatAndAdd', {highchartsSerieses});
 
     };
