@@ -398,7 +398,7 @@ if (requestedRegionsStr.length === 0) {
     const regionsToUriString = regions =>
       regions.map(region => ('county' in region ? `${region.county},${region.state}` : region.state).replace(/ /g, '+')).join(';');
 
-    const DatasetteCsvLoader = url => {
+    const DatasetteCsvLoader = (url, onComplete) => {
       const controller = new AbortController();
       const { signal } = controller;
 
@@ -431,7 +431,10 @@ if (requestedRegionsStr.length === 0) {
         `sql=select+rowid%2C+date%2C+county%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_counties+where+%22county%22+%3D+%3Ap0+and+%22state%22+%3D+%3Ap1+and+%22date%22+%3E%3D+%22${minDay}%22+order+by+date+desc` +
         `&p0=${encodeURIComponent(region.county)}` +
         `&p1=${encodeURIComponent(region.state)}` +
-        `&_size=max`
+        `&_size=max`,
+        ({columnNames, rows}) => {
+          console.log('loaded county rows', columnNames, rows);
+        }
       );
       // @TODO transform into standardized rows
       // @TODO pass through standard rows to highcharts process
@@ -444,7 +447,10 @@ if (requestedRegionsStr.length === 0) {
       const csvLoader = DatasetteCsvLoader(
         `https://covid-19.datasettes.com/covid.csv?sql=select+rowid%2C+date%2C+state%2C+fips%2C+cases%2C+deaths+from+ny_times_us_states+where+date+%3E%3D+%22${minDay}%22+and+state+%3D+%22${encodeURIComponent(
           region.state
-        )}%22+order+by+date+asc&_size=max`
+        )}%22+order+by+date+asc&_size=max`,
+        ({columnNames, rows}) => {
+          console.log('loaded state rows', columnNames, rows);
+        }
       );
       // @TODO transform into standardized rows
       // @TODO pass through standard rows to highcharts process
