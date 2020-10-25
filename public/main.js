@@ -196,6 +196,7 @@ if (requestedRegionsStr.length === 0) {
     _.sortBy(
       Object.keys(set.byRegion).map((region) => ({
         name: region,
+        color: 'red',
         data: Object.keys(set.byDay).map((day) => [
           new Date(day).getTime(),
           set.byRegion[region][day] ? set.byRegion[region][day][1] : 0,
@@ -527,11 +528,19 @@ if (requestedRegionsStr.length === 0) {
     const tagifyInput = tagifyInputContainer.querySelector('textarea');
     tagifyInput.value = JSON.stringify(requestedRegionsValue);
     tagifyInput.style.display = 'block';
+    const transformTag = (tagData) => {
+      console.log(tagData.value);
+      console.log(serieses[tagData.value]);
+      // tagData.style = "--tag-bg:" + serieses[tagData.value].color;
+      tagData.style = `--tag-bg: red`;
+    };
     tagify = new Tagify(tagifyInput, {
       enforceWhitelist: true,
       delimiters: null,
       // whitelist        : regionsMetadata, // missing NYC counties at time of writing
       whitelist: wikipediaRegions,
+
+      transformTag,
 
       templates: {
         // tag: region => region.formatted,
