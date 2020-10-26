@@ -1,4 +1,22 @@
 const minDay = "2020-03-01";
+const colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000'];
+const nextColor = (() => {
+  let nextColorIndex = 0;
+  return () => {
+    const color = colors[nextColorIndex];
+    nextColorIndex = (nextColorIndex + 1) % colors.length;
+    return color;
+  };
+})();
+const colorFor = (() => {
+  let colorLookup = {};
+  return key => {
+    if(!colorLookup[key]) {
+      colorLookup[key] = nextColor();
+    }
+    return colorLookup[key];
+  };
+})();
 
 const layout = document.querySelector(".layout");
 const updateLayout = () => {
@@ -196,7 +214,7 @@ if (requestedRegionsStr.length === 0) {
     _.sortBy(
       Object.keys(set.byRegion).map((region) => ({
         name: region,
-        color: 'red',
+        color: colorFor(region),
         data: Object.keys(set.byDay).map((day) => [
           new Date(day).getTime(),
           set.byRegion[region][day] ? set.byRegion[region][day][1] : 0,
@@ -532,7 +550,7 @@ if (requestedRegionsStr.length === 0) {
       console.log(tagData.value);
       console.log(serieses[tagData.value]);
       // tagData.style = "--tag-bg:" + serieses[tagData.value].color;
-      tagData.style = `--tag-bg: red`;
+      tagData.style = `--tag-bg: ${colorFor(tagData.value)}`;
     };
     tagify = new Tagify(tagifyInput, {
       enforceWhitelist: true,
