@@ -26,9 +26,7 @@ updateLayout();
 window.addEventListener("resize", updateLayout);
 
 const requestedRegionsStr = decodeURIComponent(window.location.search.slice(1));
-if (requestedRegionsStr.length === 0) {
-  document.querySelector(".instructions").style.display = "block";
-} else {
+
   const requestedRegions = requestedRegionsStr
     .split(";")
     .map((regionStr) =>
@@ -322,13 +320,13 @@ if (requestedRegionsStr.length === 0) {
     const byDay = _.groupBy(regionRows, (row) => row[0]);
 
     const days = Object.keys(byDay).sort();
-    const dateRange = [days[0], days[days.length - 1]].map((day) => {
-      return `<b>${day}</b>`;
-      // return dateFns.format(dateFns.parseISO(day), 'MMM D y');
-    });
-    document.querySelector(
-      ".date-range"
-    ).innerHTML = `${dateRange[0]} to ${dateRange[1]}`;
+    // const dateRange = [days[0], days[days.length - 1]].map((day) => {
+    //   return `<b>${day}</b>`;
+    //   // return dateFns.format(dateFns.parseISO(day), 'MMM D y');
+    // });
+    // document.querySelector(
+    //   ".date-range"
+    // ).innerHTML = `${dateRange[0]} to ${dateRange[1]}`;
 
     const byRegion = rows2smoothDailyRateByRegion(regionRows, populations);
     // console.log({ byRegion });
@@ -572,4 +570,3 @@ if (requestedRegionsStr.length === 0) {
     chart.reflow();
 
   })();
-}
