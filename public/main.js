@@ -1,4 +1,4 @@
-const minDay = "2020-03-01";
+const minDay = "2020-01-01";
 const colors = ['#e6194b', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#9a6324', '#fffac8', '#800000', '#aaffc3', '#808000', '#ffd8b1', '#000075', '#808080', '#ffffff', '#000000'];
 const nextColor = (() => {
   let nextColorIndex = 0;
@@ -339,13 +339,13 @@ const requestedRegionsStr = decodeURIComponent(window.location.search.slice(1));
     // debugger;
     console.log({ highchartsSeries });
 
-    const chart = Highcharts.chart(chartContainer, {
+    const chart = Highcharts.stockChart(chartContainer, {
       xAxis: {
         type: "datetime",
         labels: {
           autoRotation: false,
         },
-        // min: new Date('2020-03-01').getTime()
+        min: new Date('2021-01-01').getTime()
         // labels: {
         //     align: 'left'
         // }
